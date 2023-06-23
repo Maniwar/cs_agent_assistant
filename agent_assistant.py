@@ -75,22 +75,21 @@ with st.form(key='response_form'):
         st.write(response)
 
         # Create "Copy to Clipboard" button
-        st.components.v1.html(
-            f"""
-            <textarea id='aiResponse' style='opacity: 0; position: absolute; z-index: -1;'>{response}</textarea>
-            <button onclick='copyToClipboard()'>Copy to Clipboard</button>
-<script>
-function copyToClipboard() {
-    var copyText = document.getElementById("aiResponse");
-    copyText.select();
-    document.execCommand("copy");
-    console.log('Copied to clipboard');
-}
-</script>
-
-            """,
-            height=100,
-        )
+    st.components.v1.html(
+        f"""
+        <textarea id='aiResponse' style='opacity: 0; position: absolute; z-index: -1;'>{response}</textarea>
+        <button onclick='copyToClipboard()'>Copy to Clipboard</button>
+        <script>
+        function copyToClipboard() {{
+            var copyText = document.getElementById("aiResponse");
+            copyText.select();
+            document.execCommand("copy");
+            console.log('Copied to clipboard');
+        }}
+        </script>
+        """,
+        height=100,
+    )
 
 
 st.divider()
