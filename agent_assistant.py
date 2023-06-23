@@ -103,8 +103,16 @@ privacy_expander = st.expander('Data Privacy Statement', expanded=False)
 with privacy_expander:
     st.markdown(
         """
-        Information Collection: The only data the App collects are the customer inquiries and agent phrases you enter when you use the App. We do not collect any personal data, including contact information.
+        Information Collection: The App collects the customer inquiries and agent phrases you enter when using the App. These inputs are securely transmitted to OpenAI's GPT model to generate professional and empathetic responses.
 
-        Information Usage: Your inquiries and phrases are used solely to provide the App's services, specifically to generate professional and empathetic responses. All data are treated as confidential and are not shared with third parties.
+        Information Usage: Your inquiries and phrases are solely used to provide the App's services, which include generating appropriate responses using OpenAI's GPT model. All data are treated as confidential and are not shared with third parties for any other purpose.
+
+        Data Security: We take data security seriously. We implement measures to protect your data during transmission and storage. However, it's important to note that no system is entirely immune to potential security risks. We recommend avoiding the inclusion of any personally identifiable information or sensitive data in your inquiries or phrases.
+
+        Data Retention: We do not retain your data beyond the immediate scope of generating the AI response. Once the response is generated, any stored copies of your data are promptly deleted.
+
+        OpenAI Data Sharing: By checking the box above and using this app, you agree to share your input data with OpenAI and acknowledge that OpenAI's terms and conditions apply to the processing and use of your data by OpenAI.
+
+        If you have any concerns or questions about the data privacy practices of the App, please don't hesitate to contact us.
         """
     )
