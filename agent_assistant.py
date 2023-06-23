@@ -8,7 +8,7 @@ openai.api_key = st.secrets["OPENAI_API_KEY"]
 # Instruction paragraph
 st.markdown(
     """
-    <h3>👩‍💼 Professional and Empathetic Customer Service Assistant</h3>
+    <h3>Professional and Empathetic Customer Service Assistant</h3>
     <p>This app uses AI to generate professional and empathetic responses to customer inquiries. 
     Simply input the customer's message or your brief phrases, and get a suggested response.</p>
     """,
@@ -75,21 +75,25 @@ with st.form(key='response_form'):
         st.write(response)
 
         # Create "Copy to Clipboard" button
-    st.components.v1.html(
-        f"""
-        <textarea id='aiResponse' style='opacity: 0; position: absolute; z-index: -1;'>{response}</textarea>
-        <button onclick='copyToClipboard()'>Copy to Clipboard</button>
-        <script>
-        function copyToClipboard() {{
-            var copyText = document.getElementById("aiResponse");
-            copyText.select();
-            document.execCommand("copy");
-            console.log('Copied to clipboard');
-        }}
-        </script>
-        """,
-        height=100,
-    )
+        st.components.v1.html(
+            f"""
+            <textarea id='aiResponse' style='opacity: 0; position: absolute; z-index: -1;'>{response}</textarea>
+            <button onclick='copyToClipboard()'>Copy to Clipboard</button>
+            <script>
+            async function copyToClipboard() {{
+                var copyText = document.getElementById("aiResponse");
+                try {{
+                    await navigator.clipboard.writeText(copyText.value);
+                    console.log('Copied to clipboard');
+                }} catch (err) {{
+                    console.log('Failed to copy text: ', err);
+                }}
+            }}
+            </script>
+            """,
+            height=100,
+        )
+
 
 
 st.divider()
@@ -105,7 +109,7 @@ with privacy_expander:
 
         Data Retention: We do not retain your data beyond the immediate scope of generating the AI response. Once the response is generated, any stored copies of your data are promptly deleted.
 
-        OpenAI Data Sharing: By using this app, you agree to share your input data with OpenAI and acknowledge that OpenAI's terms and conditions apply to the processing and use of your data by OpenAI.
+        OpenAI Data Sharing: By checking the box above and using this app, you agree to share your input data with OpenAI and acknowledge that OpenAI's terms and conditions apply to the processing and use of your data by OpenAI.
 
         If you have any concerns or questions about the data privacy practices of the App, please don't hesitate to contact us.
         """
