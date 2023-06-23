@@ -72,20 +72,28 @@ with st.form(key='response_form'):
         # Display the response
         st.subheader("AI Response:")
         st.write(response)
-
+        
         # Create "Copy to Clipboard" button
         st.components.v1.html(
             f"""
             <textarea id='aiResponse' style='opacity: 0; position: absolute; z-index: -1;'>{response}</textarea>
             <button onclick='copyToClipboard()'>Copy to Clipboard</button>
             <script>
-            async function copyToClipboard() {{
+            function copyToClipboard() {{
                 var copyText = document.getElementById("aiResponse");
-                try {{
-                    await navigator.clipboard.writeText(copyText.value);
-                    console.log('Copied to clipboard');
-                }} catch (err) {{
-                    console.log('Failed to copy text: ', err);
+                if (navigator.clipboard) {{
+                    navigator.clipboard.writeText(copyText.value).then(function() {{
+                        console.log('Copied to clipboard');
+                    }}, function(err) {{
+                        console.error('Failed to copy text: ', err);
+                    }});
+                }} else {{
+                    copyText.select();
+                    if (document.execCommand("copy")) {{
+                        console.log('Copied to clipboard');
+                    }} else {{
+                        console.error('Failed to copy text');
+                    }}
                 }}
             }}
             </script>
