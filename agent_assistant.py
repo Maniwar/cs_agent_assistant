@@ -79,17 +79,15 @@ with st.form(key='response_form'):
             f"""
             <textarea id='aiResponse' style='opacity: 0; position: absolute; z-index: -1;'>{response}</textarea>
             <button onclick='copyToClipboard()'>Copy to Clipboard</button>
-            <script>
-            async function copyToClipboard() {{
-                var copyText = document.getElementById("aiResponse");
-                try {{
-                    await navigator.clipboard.writeText(copyText.value);
-                    console.log('Copied to clipboard');
-                }} catch (err) {{
-                    console.log('Failed to copy text: ', err);
-                }}
-            }}
-            </script>
+<script>
+function copyToClipboard() {
+    var copyText = document.getElementById("aiResponse");
+    copyText.select();
+    document.execCommand("copy");
+    console.log('Copied to clipboard');
+}
+</script>
+
             """,
             height=100,
         )
