@@ -3,7 +3,7 @@ import openai
 import streamlit as st
 
 # Set your OpenAI API key
-openai.api_key = os.environ.get('OPENAI_API_KEY')
+openai.api_key = st.secrets["OPENAI_API_KEY"]
 
 # Instruction paragraph
 st.markdown(
