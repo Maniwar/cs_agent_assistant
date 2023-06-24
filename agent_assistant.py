@@ -114,7 +114,7 @@ with privacy_expander:
 
         Data Retention: We do not retain your data beyond the immediate scope of generating the AI response. Once the response is generated, any stored copies of your data are promptly deleted.
 
-        OpenAI Data Sharing: By checking the box above and using this app, you agree to share your input data with OpenAI and acknowledge that OpenAI's terms and conditions apply to the processing and use of your data by OpenAI.
+        OpenAI Data Sharing: By using this app, you agree to share your input data with OpenAI and acknowledge that OpenAI's terms and conditions apply to the processing and use of your data by OpenAI.
 
         If you have any concerns or questions about the data privacy practices of the App, please don't hesitate to contact us.
         """
