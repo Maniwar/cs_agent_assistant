@@ -3,11 +3,10 @@ import streamlit as st
 
 # Set your OpenAI API key
 openai.api_key = st.secrets["OPENAI_API_KEY"]
-
+st.title("👩‍💻 Customer Service Assistant")
 # Instruction paragraph
 st.markdown(
     """
-    <h3>👩‍💻 Professional and Empathetic Customer Service Assistant</h3>
     <p>This app uses AI to generate professional and empathetic responses to customer inquiries. 
     Simply input the customer's message or your brief phrases, and get a suggested response.</p>
     """,
@@ -15,7 +14,6 @@ st.markdown(
 )
 
 # User interface and input
-st.title("Customer Service Assistant")
 input_type = st.radio(
     "Choose the type of input",
     ("Customer's Message", "Brief Phrase"),
