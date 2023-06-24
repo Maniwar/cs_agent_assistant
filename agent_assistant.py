@@ -7,7 +7,7 @@ openai.api_key = st.secrets["OPENAI_API_KEY"]
 # Instruction paragraph
 st.markdown(
     """
-    <h3>Professional and Empathetic Customer Service Assistant</h3>
+    <h3>👩‍💻 Professional and Empathetic Customer Service Assistant</h3>
     <p>This app uses AI to generate professional and empathetic responses to customer inquiries. 
     Simply input the customer's message or your brief phrases, and get a suggested response.</p>
     """,
