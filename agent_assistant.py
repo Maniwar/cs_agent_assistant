@@ -39,6 +39,7 @@ def generate_response(input_type, input_text):
         user_message = f"Generate keyphrases for the following subcategories: {input_text}"
         system_message = (
             "Your task is to generate keyphrases or short sentences that customers might use to discuss or inquire about the given subcategories. "
+            "These would be customer service complaints or NPS detractor type comments "
             "Think of common phrases, questions, or statements related to each subcategory that customers could use in their interactions. "
             "These keyphrases will be used to enhance semantic sentence co-sign similarity functions for customer comments and transcripts. "
             "Ensure that the generated keyphrases are relevant, concise, and capture the essence of each subcategory. "
@@ -55,6 +56,10 @@ def generate_response(input_type, input_text):
         user_message = f"Create subcategories and their associated keyphrases for the following main category: {input_text}"
         system_message = (
             "Your task is to create subcategories and their associated keyphrases for the main category: "
+            "These would be customer service complaints or NPS detractor type comments "
+            "Think of common phrases, questions, or statements related to each subcategory that customers could use in their interactions. "
+            "These keyphrases will be used to enhance semantic sentence co-sign similarity functions for customer comments and transcripts. "
+            "Ensure that the generated keyphrases are relevant, concise, and capture the essence of each subcategory. "
             "\"[User's Entered Main Category]\". Each subcategory should have a list of keyphrases that customers might use "
             "when discussing or inquiring about that subcategory. Please format the output in the following structure:\n"
             "{\n"
@@ -63,7 +68,7 @@ def generate_response(input_type, input_text):
             '    "[Subcategory 3]": ["Keyphrase 1", "Keyphrase 2", "Keyphrase 3"]\n'
             "}\n"
             "You can provide multiple subcategories along with their respective keyphrases, ensuring that the keyphrases are relevant "
-            "and capture the essence of each subcategory."
+            "and capture the essence of each subcategory. Provide as many as possible within your token limit"
         )
 
 
