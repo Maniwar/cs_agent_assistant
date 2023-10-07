@@ -49,6 +49,7 @@ def generate_response(input_type, input_text):
             '    "[User\'s Entered Subcategory 2]": ["Keyphrase 1", "Keyphrase 2", "Keyphrase 3"],\n'
             '    "[User\'s Entered Subcategory 3]": ["Keyphrase 1", "Keyphrase 2", "Keyphrase 3"]\n'
             "}"
+            "Provide as many as possible within your token limit. Format it in a human readable manner."
         )
 
     
@@ -68,7 +69,7 @@ def generate_response(input_type, input_text):
             '    "[Subcategory 3]": ["Keyphrase 1", "Keyphrase 2", "Keyphrase 3"]\n'
             "}\n"
             "You can provide multiple subcategories along with their respective keyphrases, ensuring that the keyphrases are relevant "
-            "and capture the essence of each subcategory. Provide as many as possible within your token limit"
+            "and capture the essence of each subcategory. Provide as many as possible within your token limit. Format it in a human readable manner."
         )
 
 
