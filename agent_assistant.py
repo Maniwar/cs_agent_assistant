@@ -38,38 +38,49 @@ def generate_response(input_type, input_text):
     elif input_type == "Create Keyphrase":
         user_message = f"Generate keyphrases for the following subcategories: {input_text}"
         system_message = (
-            "Your task is to generate keyphrases or short sentences that customers might use to discuss or inquire about the given subcategories. "
-            "These would be customer service complaints or NPS detractor type comments "
-            "Think of common phrases, questions, or statements related to each subcategory that customers could use in their interactions. "
-            "These keyphrases will be used to enhance semantic sentence co-sign similarity functions for customer comments and transcripts. "
-            "Ensure that the generated keyphrases are relevant, concise, and capture the essence of each subcategory. "
-            "Feel free to provide multiple keyphrases for each subcategory, and format the output as follows:\n"
+            "Your task is to generate keyphrases or short sentences that customers might use to discuss or inquire about the given subcategories."
+            "\n\nFormat the output as follows:\n\n"
             "{\n"
-            '    "[User\'s Entered Subcategory 1]": ["Keyphrase 1", "Keyphrase 2", "Keyphrase 3"],\n'
-            '    "[User\'s Entered Subcategory 2]": ["Keyphrase 1", "Keyphrase 2", "Keyphrase 3"],\n'
-            '    "[User\'s Entered Subcategory 3]": ["Keyphrase 1", "Keyphrase 2", "Keyphrase 3"]\n'
-            "}"
-            "Provide as many as possible within your token limit. Format it in a human readable manner."
+            '    "Website Feedback - Design and Navigation": {\n'
+            '        "Help Pages and FAQs are hard to find": ["Keyphrase 1", "Keyphrase 2", "Keyphrase 3"],\n'
+            '        "Missing Product Details": ["Keyphrase 1", "Keyphrase 2", "Keyphrase 3"],\n'
+            '        "Website Feedback - Promotion Details": ["Keyphrase 1", "Keyphrase 2", "Keyphrase 3"],\n'
+            '        "Accessibility Options do not work": ["Keyphrase 1", "Keyphrase 2", "Keyphrase 3"],\n'
+            '        "Contact Us options are hard to find": ["Keyphrase 1", "Keyphrase 2", "Keyphrase 3"],\n'
+            '        "Website Feedback - My Orders": ["Keyphrase 1", "Keyphrase 2", "Keyphrase 3"],\n'
+            '        "Website Feedback - Pop Ups": ["Keyphrase 1", "Keyphrase 2", "Keyphrase 3"],\n'
+            '        "Website Feedback - Search Feature": ["Keyphrase 1", "Keyphrase 2", "Keyphrase 3"],\n'
+            '        "Website Feedback - Product Compare": ["Keyphrase 1", "Keyphrase 2", "Keyphrase 3"],\n'
+            '        "Outlet or Live Commerce Pop Up": ["Keyphrase 1", "Keyphrase 2", "Keyphrase 3"],\n'
+            '        "Website Feedback - Design and Navigation": ["Keyphrase 1", "Keyphrase 2", "Keyphrase 3"]\n'
+            '    }\n'
+            "}\n\n"
+            "Provide as many keyphrases as possible within your token limit. Format it as a dictionary."
         )
 
-    
+
+        
     elif input_type == "Create Subcategories and Keyphrases":
         user_message = f"Create subcategories and their associated keyphrases for the following main category: {input_text}"
         system_message = (
-            "Your task is to create subcategories and their associated keyphrases for the main category: "
-            "These would be customer service complaints or NPS detractor type comments "
-            "Think of common phrases, questions, or statements related to each subcategory that customers could use in their interactions. "
-            "These keyphrases will be used to enhance semantic sentence co-sign similarity functions for customer comments and transcripts. "
-            "Ensure that the generated keyphrases are relevant, concise, and capture the essence of each subcategory. "
-            "\"[User's Entered Main Category]\". Each subcategory should have a list of keyphrases that customers might use "
-            "when discussing or inquiring about that subcategory. Please format the output in the following structure:\n"
+            "Your task is to create subcategories and their associated keyphrases for the main category."
+            "\n\nFormat the output as follows:\n\n"
             "{\n"
-            '    "[Subcategory 1]": ["Keyphrase 1", "Keyphrase 2", "Keyphrase 3"],\n'
-            '    "[Subcategory 2]": ["Keyphrase 1", "Keyphrase 2", "Keyphrase 3"],\n'
-            '    "[Subcategory 3]": ["Keyphrase 1", "Keyphrase 2", "Keyphrase 3"]\n'
-            "}\n"
-            "You can provide multiple subcategories along with their respective keyphrases, ensuring that the keyphrases are relevant "
-            "and capture the essence of each subcategory. Provide as many as possible within your token limit. Format it in a human readable manner."
+            '    "Website Feedback - Design and Navigation": {\n'
+            '        "Help Pages and FAQs are hard to find": ["Keyphrase 1", "Keyphrase 2", "Keyphrase 3"],\n'
+            '        "Missing Product Details": ["Keyphrase 1", "Keyphrase 2", "Keyphrase 3"],\n'
+            '        "Website Feedback - Promotion Details": ["Keyphrase 1", "Keyphrase 2", "Keyphrase 3"],\n'
+            '        "Accessibility Options do not work": ["Keyphrase 1", "Keyphrase 2", "Keyphrase 3"],\n'
+            '        "Contact Us options are hard to find": ["Keyphrase 1", "Keyphrase 2", "Keyphrase 3"],\n'
+            '        "Website Feedback - My Orders": ["Keyphrase 1", "Keyphrase 2", "Keyphrase 3"],\n'
+            '        "Website Feedback - Pop Ups": ["Keyphrase 1", "Keyphrase 2", "Keyphrase 3"],\n'
+            '        "Website Feedback - Search Feature": ["Keyphrase 1", "Keyphrase 2", "Keyphrase 3"],\n'
+            '        "Website Feedback - Product Compare": ["Keyphrase 1", "Keyphrase 2", "Keyphrase 3"],\n'
+            '        "Outlet or Live Commerce Pop Up": ["Keyphrase 1", "Keyphrase 2", "Keyphrase 3"],\n'
+            '        "Website Feedback - Design and Navigation": ["Keyphrase 1", "Keyphrase 2", "Keyphrase 3"]\n'
+            '    }\n'
+            "}\n\n"
+            "You can provide multiple subcategories along with their respective keyphrases. Format it as a dictionary."
         )
 
 
@@ -104,9 +115,11 @@ with st.form(key='response_form'):
         with st.spinner("Generating response..."):
             response = generate_response(input_type, input_text)
 
-        # Display the response
+        # Display the response with page breaks
         st.subheader("AI Response:")
-        st.markdown(response, unsafe_allow_html=True)  # Use Markdown for rendering HTML tags
+        response_with_line_breaks = response.replace('\n', '<br>')
+        st.markdown(response_with_line_breaks, unsafe_allow_html=True)  # Use Markdown for rendering HTML tags
+
 
         
         # Create "Copy to Clipboard" button
