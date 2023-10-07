@@ -106,7 +106,8 @@ with st.form(key='response_form'):
 
         # Display the response
         st.subheader("AI Response:")
-        st.write(response)
+        st.markdown(response, unsafe_allow_html=True)  # Use Markdown for rendering HTML tags
+
         
         # Create "Copy to Clipboard" button
         st.components.v1.html(
