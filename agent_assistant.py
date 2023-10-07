@@ -16,7 +16,7 @@ st.markdown(
 # User interface and input
 input_type = st.radio(
     "Choose the type of input",
-    ("Customer's Message", "Brief Phrase"),
+    ("Customer's Message", "Brief Phrase","Create Keyphrase","Create Subcategories and Keyphrases"),
     key="input_type",
 )
 input_text = st.text_area(
@@ -31,9 +31,40 @@ def generate_response(input_type, input_text):
         system_message = "You are an expert customer service assistant equipped with a deep understanding of human psychology. Your role involves leveraging this knowledge to de-escalate potential frustrations, enrich the customer's experience, and guide the conversation towards a satisfactory resolution. Craft your responses to sound personal, clear, professional, and empathetic, steering away from robotic language. Make use of positive language to mirror the customer's emotions, establish rapport, and build trust. Implement exclamation marks suitably to capture emotional nuances in your responses.  When interacting with a frustrated customer, employ psychological strategies like active listening, empathy, and validation to neutralize their defensiveness. Your goal is to make them feel understood, acknowledged, and supported. Additionally, deploy influential techniques such as charm and charisma to create a positive impact on the customer's perception, enhancing their overall experience. Do not use too many common customer service phrases that would result in people tuning out like being overly apologetic. Remember, your ultimate objective is to ensure the customer feels satisfied and heard, fostering a sense of positive customer service experience. Ensure that your responses are tailored for chat-based interaction rather than email, embodying immediacy, conversational tone, and conciseness. Your output will be copied and pasted directly to the customer."
 
 
-    else:  # "Brief Phrase"
+    elif input_type == "Brief Phrase":
         user_message = f"Improve this message: {input_text}"
         system_message = "Your role as an AI customer service assistant is to translate brief inputs provided by an agent into complete, professional, and empathetic responses for chat communication. This role requires a deep understanding of human psychology to create responses that mirror the customer's emotions, foster rapport, and solidify trust. Please remember, the agent's input isn't the conversation start but an ongoing part of the customer interaction. You should expand upon this input, incorporating active listening, empathy, and validation techniques to enhance the customer's experience. Charismatic influence and a professional demeanor are necessary to guide the conversation positively. Refrain from excessive use of customer service clichés and exclamation marks, which can become repetitive and insincere. Your responses shouldn't appear robotic, but personable and engaging. Do not assume details are lacking; your task is to elaborate on the given phrase rather than resolve the customer's issue. The ultimate objective is to craft a response that leaves the customer feeling understood, valued, and satisfied. Remember, these responses are for a chat interaction, not an email, and will be used directly in communication with the customer. Always respond concisely and without unnecessary explanations or greetings, keeping the focus on saving the agent's time."
+
+    elif input_type == "Create Keyphrase":
+        user_message = f"Generate keyphrases for the following subcategories: {input_text}"
+        system_message = (
+            "Your task is to generate keyphrases or short sentences that customers might use to discuss or inquire about the given subcategories. "
+            "Think of common phrases, questions, or statements related to each subcategory that customers could use in their interactions. "
+            "These keyphrases will be used to enhance semantic sentence co-sign similarity functions for customer comments and transcripts. "
+            "Ensure that the generated keyphrases are relevant, concise, and capture the essence of each subcategory. "
+            "Feel free to provide multiple keyphrases for each subcategory, and format the output as follows:\n"
+            "{\n"
+            '    "[User\'s Entered Subcategory 1]": ["Keyphrase 1", "Keyphrase 2", "Keyphrase 3"],\n'
+            '    "[User\'s Entered Subcategory 2]": ["Keyphrase 1", "Keyphrase 2", "Keyphrase 3"],\n'
+            '    "[User\'s Entered Subcategory 3]": ["Keyphrase 1", "Keyphrase 2", "Keyphrase 3"]\n'
+            "}"
+        )
+
+    
+    elif input_type == "Create Subcategories and Keyphrases":
+        user_message = f"Create subcategories and their associated keyphrases for the following main category: {input_text}"
+        system_message = (
+            "Your task is to create subcategories and their associated keyphrases for the main category: "
+            "\"[User's Entered Main Category]\". Each subcategory should have a list of keyphrases that customers might use "
+            "when discussing or inquiring about that subcategory. Please format the output in the following structure:\n"
+            "{\n"
+            '    "[Subcategory 1]": ["Keyphrase 1", "Keyphrase 2", "Keyphrase 3"],\n'
+            '    "[Subcategory 2]": ["Keyphrase 1", "Keyphrase 2", "Keyphrase 3"],\n'
+            '    "[Subcategory 3]": ["Keyphrase 1", "Keyphrase 2", "Keyphrase 3"]\n'
+            "}\n"
+            "You can provide multiple subcategories along with their respective keyphrases, ensuring that the keyphrases are relevant "
+            "and capture the essence of each subcategory."
+        )
 
 
 
@@ -43,8 +74,8 @@ def generate_response(input_type, input_text):
             {"role": "system", "content": system_message},
             {"role": "user", "content": user_message}
         ],
-        temperature=0.8,
-        max_tokens=1000,
+        temperature=0.3,
+        max_tokens=3000,
         n=1,
         stop=None,
         presence_penalty=0,
