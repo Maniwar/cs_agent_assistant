@@ -16,7 +16,7 @@ st.markdown(
 # User interface and input
 input_type = st.radio(
     "Choose the type of input",
-    ("Customer's Message", "Brief Phrase","Create Keyphrase","Create Subcategories and Keyphrases"),
+    ("Customer's Message", "Brief Phrase","Create Keyphrase"),
     key="input_type",
 )
 input_text = st.text_area(
@@ -62,30 +62,6 @@ def generate_response(input_type, input_text):
             "Provide as many keyphrases as possible within your token limit. Format it as a dictionary."
         )
 
-
-        
-    elif input_type == "Create Subcategories and Keyphrases":
-        user_message = f"Create subcategories and their associated keyphrases for the following main category: {input_text}"
-        system_message = (
-            "Your task is to create subcategories and their associated keyphrases for the main category."
-            "\n\nFormat the output as follows:\n\n"
-            "{\n"
-            '    "Website Feedback - Design and Navigation": {\n'
-            '        "Help Pages and FAQs are hard to find": ["Keyphrase 1", "Keyphrase 2", "Keyphrase 3"],\n'
-            '        "Missing Product Details": ["Keyphrase 1", "Keyphrase 2", "Keyphrase 3"],\n'
-            '        "Website Feedback - Promotion Details": ["Keyphrase 1", "Keyphrase 2", "Keyphrase 3"],\n'
-            '        "Accessibility Options do not work": ["Keyphrase 1", "Keyphrase 2", "Keyphrase 3"],\n'
-            '        "Contact Us options are hard to find": ["Keyphrase 1", "Keyphrase 2", "Keyphrase 3"],\n'
-            '        "Website Feedback - My Orders": ["Keyphrase 1", "Keyphrase 2", "Keyphrase 3"],\n'
-            '        "Website Feedback - Pop Ups": ["Keyphrase 1", "Keyphrase 2", "Keyphrase 3"],\n'
-            '        "Website Feedback - Search Feature": ["Keyphrase 1", "Keyphrase 2", "Keyphrase 3"],\n'
-            '        "Website Feedback - Product Compare": ["Keyphrase 1", "Keyphrase 2", "Keyphrase 3"],\n'
-            '        "Outlet or Live Commerce Pop Up": ["Keyphrase 1", "Keyphrase 2", "Keyphrase 3"],\n'
-            '        "Website Feedback - Design and Navigation": ["Keyphrase 1", "Keyphrase 2", "Keyphrase 3"]\n'
-            '    }\n'
-            "}\n\n"
-            "You can provide multiple subcategories along with their respective keyphrases. Format it as a dictionary."
-        )
 
 
 
