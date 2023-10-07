@@ -39,6 +39,10 @@ def generate_response(input_type, input_text):
         user_message = f"Generate keyphrases for the following subcategories: {input_text}"
         system_message = (
             "Your task is to generate keyphrases or short sentences that customers might use to discuss or inquire about the given subcategories."
+            "These would be customer service complaints or NPS detractor type comments. "
+            "Think of common phrases, questions, or statements related to each subcategory that customers could use in their interactions. "
+            "These keyphrases will be used to enhance semantic sentence co-sign similarity functions for customer comments and transcripts. "
+            "Ensure that the generated keyphrases are relevant, concise, and capture the essence of each subcategory."
             "\n\nFormat the output as follows:\n\n"
             "{\n"
             '    "Website Feedback - Design and Navigation": {\n'
