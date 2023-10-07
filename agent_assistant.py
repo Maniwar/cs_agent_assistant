@@ -59,7 +59,7 @@ def generate_response(input_type, input_text):
             '        "Website Feedback - Design and Navigation": ["Keyphrase 1", "Keyphrase 2", "Keyphrase 3"]\n'
             '    }\n'
             "}\n\n"
-            "Provide as many keyphrases as possible within your token limit. Format it as a dictionary."
+            "Provide as many keyphrases as possible within your token limit. Format it as a dictionary. You must create as many as possible."
         )
 
 
