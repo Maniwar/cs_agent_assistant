@@ -67,7 +67,7 @@ def generate_response(input_type, input_text):
 
 
 
-    response = client.Completion.create(
+    response = client.chat.Completion.create(
         model="gpt-3.5-turbo",
         messages=[
             {"role": "system", "content": system_message},
