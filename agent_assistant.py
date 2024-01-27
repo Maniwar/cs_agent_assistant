@@ -1,4 +1,4 @@
-import openai
+from openai import OpenAI
 import streamlit as st
 
 # Set your OpenAI API key
@@ -65,7 +65,7 @@ def generate_response(input_type, input_text):
 
 
 
-    response = openai.Completion.create(
+    response = openai.chat.completions.create(
         model="gpt-3.5-turbo",
         messages=[
             {"role": "system", "content": system_message},
