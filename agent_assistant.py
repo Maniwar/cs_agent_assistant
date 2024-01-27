@@ -82,7 +82,7 @@ def generate_response(input_type, input_text):
         user="user-identifier"
     )
 
-    ai_response = response.choices[0].message['content'].strip()
+    ai_response = response.choices[0].message.content.strip()
     # Remove "Response: " prefix
     if ai_response.startswith("Response:"):
         ai_response = ai_response[len("Response:"):].strip()
