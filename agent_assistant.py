@@ -3,8 +3,8 @@ import streamlit as st
 
 # Set your OpenAI API key
 client = OpenAI(
-  api_key=st.secrets['OPENAI_API_KEY'],  # this is also the default, it can be omitted
-)
+  api_key=st.secrets['OPENAI_API_KEY'],  # this is also the default, it can be omitted)
+
 st.title("👩‍💻 Customer Service Assistant")
 # Instruction paragraph
 st.markdown(
