@@ -65,7 +65,7 @@ def generate_response(input_type, input_text):
 
 
 
-    response = openai.ChatCompletion.create(
+    response = openai.Completion.create(
         model="gpt-3.5-turbo",
         messages=[
             {"role": "system", "content": system_message},
@@ -80,7 +80,7 @@ def generate_response(input_type, input_text):
         user="user-identifier"
     )
 
-    ai_response = response['choices'][0]['message']['content'].strip()
+    ai_response = response.choices[0].message['content'].strip()
     # Remove "Response: " prefix
     if ai_response.startswith("Response:"):
         ai_response = ai_response[len("Response:"):].strip()
