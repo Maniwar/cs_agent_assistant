@@ -18,7 +18,7 @@ st.markdown(
 # User interface and input
 input_type = st.radio(
     "Choose the type of input",
-    ("Customer's Message", "Brief Phrase","Create Keyphrase"),
+    ("Customer's Message", "Brief Phrase"),#"Create Keyphrase"),
     key="input_type",
 )
 input_text = st.text_area(
@@ -37,23 +37,23 @@ def generate_response(input_type, input_text):
         user_message = f"Improve this message: {input_text}"
         system_message = "Your role as an AI customer service assistant is to translate brief inputs provided by an agent into complete, professional, and empathetic responses for chat communication. This role requires a deep understanding of human psychology to create responses that mirror the customer's emotions, foster rapport, and solidify trust. Please remember, the agent's input isn't the conversation start but an ongoing part of the customer interaction. You should expand upon this input, incorporating active listening, empathy, and validation techniques to enhance the customer's experience. Charismatic influence and a professional demeanor are necessary to guide the conversation positively. Refrain from excessive use of customer service clichés and exclamation marks, which can become repetitive and insincere. Your responses shouldn't appear robotic, but personable and engaging. Do not assume details are lacking; your task is to elaborate on the given phrase rather than resolve the customer's issue. The ultimate objective is to craft a response that leaves the customer feeling understood, valued, and satisfied. Remember, these responses are for a chat interaction, not an email, and will be used directly in communication with the customer. Always respond concisely and without unnecessary explanations or greetings, keeping the focus on saving the agent's time."
 
-    elif input_type == "Create Keyphrase":
-        user_message = f"Generate keyphrases for the following subcategories: {input_text}"
-        system_message = (
-            "Your task is to generate keyphrases or short sentences that customers might use to discuss or inquire about the given subcategories."
-            "These would be customer service complaints or NPS detractor type comments. "
-            "Think of common phrases, questions, or statements related to each subcategory that customers could use in their interactions. "
-            "These keyphrases will be used to enhance semantic sentence co-sign similarity functions for customer comments and transcripts. "
-            "Ensure that the generated keyphrases are relevant, concise, and capture the essence of each subcategory."
-            "\n\The following would be an example of the formatting:\n\n"
-            "{\n"
-            '    "Main category": {\n'
-            '        "subcategory 1": ["Keyphrase 1", "Keyphrase 2", "Keyphrase 3"],\n'
-            '        "subcategory 2": ["Keyphrase 1", "Keyphrase 2", "Keyphrase 3"],\n'
-            '    }\n'
-            "}\n\n"
-            "Provide as many keyphrases as possible within your token limit. Format it as a dictionary. You must create as many as possible."
-        )
+   # elif input_type == "Create Keyphrase":
+    #    user_message = f"Generate keyphrases for the following subcategories: {input_text}"
+     #   system_message = (
+      #      "Your task is to generate keyphrases or short sentences that customers might use to discuss or inquire about the given subcategories."
+       #     "These would be customer service complaints or NPS detractor type comments. "
+        #    "Think of common phrases, questions, or statements related to each subcategory that customers could use in their interactions. "
+         #   "These keyphrases will be used to enhance semantic sentence co-sign similarity functions for customer comments and transcripts. "
+          #  "Ensure that the generated keyphrases are relevant, concise, and capture the essence of each subcategory."
+           # "\n\The following would be an example of the formatting:\n\n"
+           # "{\n"
+           # '    "Main category": {\n'
+           # '        "subcategory 1": ["Keyphrase 1", "Keyphrase 2", "Keyphrase 3"],\n'
+           # '        "subcategory 2": ["Keyphrase 1", "Keyphrase 2", "Keyphrase 3"],\n'
+           # '    }\n'
+           # "}\n\n"
+            #"Provide as many keyphrases as possible within your token limit. Format it as a dictionary. You must create as many as possible."
+        #)
 
 
 
