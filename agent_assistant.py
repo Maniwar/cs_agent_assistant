@@ -45,20 +45,11 @@ def generate_response(input_type, input_text):
             "Think of common phrases, questions, or statements related to each subcategory that customers could use in their interactions. "
             "These keyphrases will be used to enhance semantic sentence co-sign similarity functions for customer comments and transcripts. "
             "Ensure that the generated keyphrases are relevant, concise, and capture the essence of each subcategory."
-            "\n\nFormat the output as follows:\n\n"
+            "\n\The following would be an example of the formatting:\n\n"
             "{\n"
-            '    "Website Feedback - Design and Navigation": {\n'
-            '        "Help Pages and FAQs are hard to find": ["Keyphrase 1", "Keyphrase 2", "Keyphrase 3"],\n'
-            '        "Missing Product Details": ["Keyphrase 1", "Keyphrase 2", "Keyphrase 3"],\n'
-            '        "Website Feedback - Promotion Details": ["Keyphrase 1", "Keyphrase 2", "Keyphrase 3"],\n'
-            '        "Accessibility Options do not work": ["Keyphrase 1", "Keyphrase 2", "Keyphrase 3"],\n'
-            '        "Contact Us options are hard to find": ["Keyphrase 1", "Keyphrase 2", "Keyphrase 3"],\n'
-            '        "Website Feedback - My Orders": ["Keyphrase 1", "Keyphrase 2", "Keyphrase 3"],\n'
-            '        "Website Feedback - Pop Ups": ["Keyphrase 1", "Keyphrase 2", "Keyphrase 3"],\n'
-            '        "Website Feedback - Search Feature": ["Keyphrase 1", "Keyphrase 2", "Keyphrase 3"],\n'
-            '        "Website Feedback - Product Compare": ["Keyphrase 1", "Keyphrase 2", "Keyphrase 3"],\n'
-            '        "Outlet or Live Commerce Pop Up": ["Keyphrase 1", "Keyphrase 2", "Keyphrase 3"],\n'
-            '        "Website Feedback - Design and Navigation": ["Keyphrase 1", "Keyphrase 2", "Keyphrase 3"]\n'
+            '    "Main category": {\n'
+            '        "subcategory 1": ["Keyphrase 1", "Keyphrase 2", "Keyphrase 3"],\n'
+            '        "subcategory 2": ["Keyphrase 1", "Keyphrase 2", "Keyphrase 3"],\n'
             '    }\n'
             "}\n\n"
             "Provide as many keyphrases as possible within your token limit. Format it as a dictionary. You must create as many as possible."
@@ -74,7 +65,7 @@ def generate_response(input_type, input_text):
             {"role": "user", "content": user_message}
         ],
         temperature=0.3,
-        max_tokens=3000,
+        max_tokens=4000,
         n=1,
         stop=None,
         presence_penalty=0,
