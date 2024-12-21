@@ -332,21 +332,22 @@ input_col, output_col = st.columns([1, 2])
 
 with input_col:
     st.header("📝 Input")
-    # User interface and input
-    input_type = st.radio(
-        "Choose the type of input",
-        ("Customer's Message", "Brief Phrase"),
-        key="input_type",
-    )
-    input_text = st.text_area(
-        "Enter Your Input",
-        key="input_text",
-        height=200,
-    )
-    generate_button = st.button(label='Generate', key='generate_button', disabled=not input_text.strip())
-
-with output_col:
-    if generate_button:
+    # Use Streamlit's form to handle input submission
+    with st.form(key='input_form'):
+        input_type = st.radio(
+            "Choose the type of input",
+            ("Customer's Message", "Brief Phrase"),
+            key="input_type",
+        )
+        input_text = st.text_area(
+            "Enter Your Input",
+            key="input_text",
+            height=200,
+        )
+        submit_button = st.form_submit_button(label='Generate')
+    
+    # Prevent empty submissions by validating input
+    if submit_button:
         if not input_text.strip():
             st.warning("Please enter some input to generate a response.")
         else:
@@ -354,49 +355,58 @@ with output_col:
                 response = generate_response(input_type, input_text)
                 blueprint = generate_blueprint(input_type, input_text) if response else None
 
-        # ---------------------------------------------------
-        # 9. Display AI Response
-        # ---------------------------------------------------
-        if response:
-            st.markdown("### 📄 Generated Response")
-            response_div_id = "aiResponse"
+            # Store responses in session state to prevent resets
+            st.session_state['response'] = response
+            st.session_state['blueprint'] = blueprint
+
+with output_col:
+    # Retrieve responses from session state
+    response = st.session_state.get('response', None)
+    blueprint = st.session_state.get('blueprint', None)
+    
+    # ---------------------------------------------------
+    # 9. Display AI Response
+    # ---------------------------------------------------
+    if response:
+        st.markdown("### 📄 Generated Response")
+        response_div_id = "aiResponse"
+        st.markdown(
+            f"""<div class="ai-response" id="{response_div_id}">
+                {response}
+            </div>""",
+            unsafe_allow_html=True
+        )
+        # Copy Response Button
+        copy_response_button = f"""
+        <button class="copy-button" onclick="copyToClipboard('{response_div_id}')">📋 Copy Response</button>
+        """
+        st.markdown(copy_response_button, unsafe_allow_html=True)
+
+    # ---------------------------------------------------
+    # 10. Display Blueprint
+    # ---------------------------------------------------
+    if blueprint:
+        blueprint_df = parse_markdown_table(blueprint)
+        if blueprint_df is not None:
+            st.markdown("### 📋 Interaction Blueprint")
+            blueprint_div_id = "blueprint"
             st.markdown(
-                f"""<div class="ai-response" id="{response_div_id}">
-                    {response}
+                f"""<div class="card" id="{blueprint_div_id}">
+                    {blueprint_df.to_html(index=False, classes='blueprint-table')}
                 </div>""",
                 unsafe_allow_html=True
             )
-            # Copy Response Button
-            copy_response_button = f"""
-            <button class="copy-button" onclick="copyToClipboard('{response_div_id}')">📋 Copy Response</button>
+            # Copy Blueprint Button
+            copy_blueprint_button = f"""
+            <button class="copy-button" onclick="copyToClipboard('{blueprint_div_id}')">📋 Copy Blueprint</button>
             """
-            st.markdown(copy_response_button, unsafe_allow_html=True)
-
-        # ---------------------------------------------------
-        # 10. Display Blueprint
-        # ---------------------------------------------------
-        if blueprint:
-            blueprint_df = parse_markdown_table(blueprint)
-            if blueprint_df is not None:
-                st.markdown("### 📋 Interaction Blueprint")
-                blueprint_div_id = "blueprint"
-                st.markdown(
-                    f"""<div class="card" id="{blueprint_div_id}">
-                        {blueprint_df.to_html(index=False, classes='blueprint-table')}
-                    </div>""",
-                    unsafe_allow_html=True
-                )
-                # Copy Blueprint Button
-                copy_blueprint_button = f"""
-                <button class="copy-button" onclick="copyToClipboard('{blueprint_div_id}')">📋 Copy Blueprint</button>
-                """
-                st.markdown(copy_blueprint_button, unsafe_allow_html=True)
-            else:
-                st.warning("Could not parse the blueprint table. Please ensure the AI provides a valid markdown table.")
-                st.text(blueprint)
+            st.markdown(copy_blueprint_button, unsafe_allow_html=True)
+        else:
+            st.warning("Could not parse the blueprint table. Please ensure the AI provides a valid markdown table.")
+            st.text(blueprint)
 
 # ---------------------------------------------------
-# 11. Inject JavaScript for Copy Functionality
+# 11. Inject JavaScript for Copy Functionality and Confirmation Pop-Up
 # ---------------------------------------------------
 copy_js = """
 <script>
@@ -405,6 +415,7 @@ function copyToClipboard(elementId) {
     if (element) {
         // Use the Clipboard API
         navigator.clipboard.writeText(element.innerText).then(function() {
+            // Show a non-intrusive confirmation pop-up using alert
             alert('Copied to clipboard!');
         }, function(err) {
             alert('Failed to copy text.');
