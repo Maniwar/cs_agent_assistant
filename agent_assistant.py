@@ -1,8 +1,8 @@
-from openai import OpenAI
 import streamlit as st
 import pandas as pd
 from io import StringIO
 import re
+from openai import OpenAI
 
 # ---------------------------------------------------
 # 1. Initialize OpenAI Client
@@ -12,144 +12,7 @@ client = OpenAI(
 )  # Ensure your OpenAI API key is correctly set in Streamlit secrets
 
 # ---------------------------------------------------
-# 2. Define Function to Inject Theme-Aware CSS
-# ---------------------------------------------------
-def inject_css(theme):
-    if theme == "dark":
-        background_color = "#1f2937"
-        card_background = "#374151"
-        ai_response_bg = "#374151"
-        ai_response_border = "#3b82f6"
-        text_color = "#ffffff"
-        table_header_bg = "#2563eb"
-        table_row_even_bg = "#4b5563"
-        button_bg = "#2563eb"
-        button_hover_bg = "#1e40af"
-    else:
-        # Light theme colors
-        background_color = "#f5f5f7"
-        card_background = "#ffffff"
-        ai_response_bg = "#e5f4ff"
-        ai_response_border = "#3b82f6"
-        text_color = "#1f2937"
-        table_header_bg = "#3b82f6"
-        table_row_even_bg = "#f2f2f2"
-        button_bg = "#3b82f6"
-        button_hover_bg = "#2563eb"
-
-    st.markdown(
-        f"""
-        <style>
-        :root {{
-            --primary-color: {button_bg};
-            --primary-hover-color: {button_hover_bg};
-            --background-color: {background_color};
-            --card-background: {card_background};
-            --ai-response-bg: {ai_response_bg};
-            --ai-response-border: {ai_response_border};
-            --text-color: {text_color};
-            --table-header-bg: {table_header_bg};
-            --table-row-even-bg: {table_row_even_bg};
-            --button-bg: {button_bg};
-            --button-hover-bg: {button_hover_bg};
-        }}
-
-        /* General Styling */
-        body {{
-            background-color: var(--background-color);
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
-            color: var(--text-color);
-            transition: background-color 0.3s ease, color 0.3s ease;
-        }}
-
-        /* Card Styling */
-        .card {{
-            background-color: var(--card-background);
-            border-radius: 12px;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-            padding: 20px;
-            margin-bottom: 20px;
-            transition: background-color 0.3s ease, color 0.3s ease;
-        }}
-
-        /* AI Response Styling */
-        .ai-response {{
-            background-color: var(--ai-response-bg);
-            border-left: 6px solid var(--ai-response-border);
-            padding: 15px;
-            border-radius: 8px;
-            font-size: 16px;
-            line-height: 1.6;
-            color: var(--text-color);
-            transition: background-color 0.3s ease, color 0.3s ease;
-        }}
-
-        /* Blueprint Table Styling */
-        .blueprint-table {{
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 10px;
-            transition: background-color 0.3s ease, color 0.3s ease;
-        }}
-
-        .blueprint-table th, .blueprint-table td {{
-            border: 1px solid #ddd;
-            padding: 12px 15px;
-            text-align: left;
-            color: var(--text-color);
-            transition: background-color 0.3s ease, color 0.3s ease;
-        }}
-
-        .blueprint-table th {{
-            background-color: var(--table-header-bg);
-            color: white;
-            font-weight: 600;
-            transition: background-color 0.3s ease, color 0.3s ease;
-        }}
-
-        .blueprint-table tr:nth-child(even) {{
-            background-color: var(--table-row-even-bg);
-            transition: background-color 0.3s ease, color 0.3s ease;
-        }}
-
-        /* Button Styling */
-        .copy-button {{
-            background-color: var(--button-bg);
-            color: white;
-            border: none;
-            padding: 10px 16px;
-            text-align: center;
-            text-decoration: none;
-            display: inline-block;
-            font-size: 14px;
-            margin-top: 10px;
-            border-radius: 8px;
-            cursor: pointer;
-            transition: background-color 0.3s ease;
-        }}
-
-        .copy-button:hover {{
-            background-color: var(--primary-hover-color);
-        }}
-
-        /* Responsive Layout */
-        @media (max-width: 768px) {{
-            .card {{
-                padding: 15px;
-            }}
-
-            .copy-button {{
-                width: 100%;
-                padding: 12px 0;
-            }}
-        }}
-        </style>
-        """,
-        unsafe_allow_html=True
-    )
-
-# ---------------------------------------------------
-# 3. Define Helper Functions
+# 2. Define Helper Functions
 # ---------------------------------------------------
 def generate_response(input_type, input_text):
     try:
@@ -186,13 +49,13 @@ def generate_response(input_type, input_text):
             return None
 
         response = client.chat.completions.create(
-            model="gpt-4o-mini",  # Ensure this is the correct model name with hyphen
+            model="gpt-4",  # Replace with the correct model name if different
             messages=[
                 {"role": "system", "content": system_message},
                 {"role": "user", "content": user_message},
             ],
             temperature=0.3,
-            max_tokens=16000,
+            max_tokens=4000,
             n=1,
             stop=None,
             presence_penalty=0,
@@ -204,9 +67,6 @@ def generate_response(input_type, input_text):
         # Remove "Response: " prefix if present
         if ai_response.lower().startswith("response:"):
             ai_response = ai_response[len("response:"):].strip()
-
-        # Escape backslashes in ai_response to prevent f-string issues
-        ai_response = ai_response.replace('\\', '\\\\')
 
         return ai_response
 
@@ -238,7 +98,7 @@ def generate_blueprint(input_type, input_text):
         )
 
         blueprint_response = client.chat.completions.create(
-            model="gpt-4o-mini",
+            model="gpt-4",  # Replace with the correct model name if different
             messages=[
                 {"role": "system", "content": system_message},
                 {"role": "user", "content": user_message}
@@ -251,9 +111,6 @@ def generate_blueprint(input_type, input_text):
             frequency_penalty=0,
             user="user-identifier"
         ).choices[0].message.content.strip()
-
-        # Escape backslashes in blueprint_response to prevent f-string issues
-        blueprint_response = blueprint_response.replace('\\', '\\\\')
 
         return blueprint_response
 
@@ -282,6 +139,96 @@ def parse_markdown_table(md_table):
         return None
 
 # ---------------------------------------------------
+# 3. Define Function to Inject Theme-Aware CSS
+# ---------------------------------------------------
+def inject_css():
+    st.markdown(
+        """
+        <style>
+        /* Ensure all elements adapt to the current theme */
+        .card {
+            background-color: var(--card-background);
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            padding: 20px;
+            margin-bottom: 20px;
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
+
+        .ai-response {
+            background-color: var(--ai-response-bg);
+            border-left: 6px solid var(--ai-response-border);
+            padding: 15px;
+            border-radius: 8px;
+            font-size: 16px;
+            line-height: 1.6;
+            color: var(--text-color);
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
+
+        .blueprint-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
+
+        .blueprint-table th, .blueprint-table td {
+            border: 1px solid #ddd;
+            padding: 12px 15px;
+            text-align: left;
+            color: var(--text-color);
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
+
+        .blueprint-table th {
+            background-color: var(--table-header-bg);
+            color: white;
+            font-weight: 600;
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
+
+        .blueprint-table tr:nth-child(even) {
+            background-color: var(--table-row-even-bg);
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
+
+        .copy-button {
+            background-color: var(--button-bg);
+            color: white;
+            border: none;
+            padding: 10px 16px;
+            text-align: center;
+            text-decoration: none;
+            display: inline-block;
+            font-size: 14px;
+            margin-top: 10px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        .copy-button:hover {
+            background-color: var(--button-hover-bg);
+        }
+
+        /* Responsive Layout */
+        @media (max-width: 768px) {
+            .card {
+                padding: 15px;
+            }
+
+            .copy-button {
+                width: 100%;
+                padding: 12px 0;
+            }
+        }
+        </style>
+        """,
+        unsafe_allow_html=True
+    )
+
+# ---------------------------------------------------
 # 4. Set Page Configuration
 # ---------------------------------------------------
 st.set_page_config(
@@ -293,27 +240,32 @@ st.set_page_config(
 # ---------------------------------------------------
 # 5. Retrieve the Current Theme and Inject CSS
 # ---------------------------------------------------
-try:
-    current_theme = st.runtime.get_theme()
-    theme_mode = current_theme.base  # 'dark' or 'light'
-except AttributeError:
-    # Fallback for older Streamlit versions
-    theme_mode = "light"
+def get_current_theme():
+    try:
+        current_theme = st.runtime.get_theme()
+        return current_theme.base  # 'dark' or 'light'
+    except AttributeError:
+        # Fallback for older Streamlit versions
+        return "light"
 
-inject_css(theme_mode)
+theme_mode = get_current_theme()
+inject_css()
 
 # ---------------------------------------------------
 # 6. Title and Instructions
 # ---------------------------------------------------
-st.title("👩‍💻 Customer Service Assistant")
+st.markdown("<h1 style='text-align: center;'>👩‍💻 Customer Service Assistant</h1>", unsafe_allow_html=True)
 
 with st.expander("ℹ️ How to Use"):
     st.markdown(
         """
-        This app generates professional and empathetic responses to customer inquiries. 
-        - **Input Type:** Choose between a full customer message or a brief phrase.
-        - **Generate:** Click the "Generate" button to receive a response and a tailored interaction blueprint.
-        - **Copy:** Use the provided buttons to copy the generated content for use in your communications.
+        This app generates professional and empathetic responses to customer inquiries.
+
+        **Steps to Use:**
+        1. **Input Type:** Choose between a full customer message or a brief phrase.
+        2. **Enter Input:** Provide the customer's message or the brief phrase.
+        3. **Generate:** Click the "Generate" button to receive a response and a tailored interaction blueprint.
+        4. **Copy:** Use the "Copy Response" and "Copy Blueprint" buttons to copy the generated content for your communications.
         """
     )
 
@@ -327,7 +279,7 @@ with input_col:
     # User interface and input
     input_type = st.radio(
         "Choose the type of input",
-        ("Customer's Message", "Brief Phrase"),  # "Create Keyphrase"),
+        ("Customer's Message", "Brief Phrase"),
         key="input_type",
     )
     input_text = st.text_area(
@@ -407,7 +359,7 @@ with output_col:
         )
 
 # ---------------------------------------------------
-# 11. Collapsible Privacy Statement
+# 8. Collapsible Privacy Statement
 # ---------------------------------------------------
 with st.expander('🔒 Data Privacy Statement', expanded=False):
     st.markdown(
