@@ -192,7 +192,7 @@ def generate_response(input_type, input_text):
                 {"role": "user", "content": user_message},
             ],
             temperature=0.3,
-            max_tokens=4000,
+            max_tokens=16000,
             n=1,
             stop=None,
             presence_penalty=0,
