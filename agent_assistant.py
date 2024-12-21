@@ -337,3 +337,35 @@ with output_col:
         # Display the blueprint in a markdown code block with native copy button
         st.markdown("**Copy the blueprint below:**")
         st.markdown(f"```markdown\n{blueprint}\n```")
+        
+        # ---------------------------------------------------
+        # 11. Extract and Display Customer-Facing Sentences
+        # ---------------------------------------------------
+        # Parse the blueprint table to extract the 'Example' column
+        table_match = re.findall(r'\|.*\|', blueprint)
+        if not table_match:
+            st.warning("Could not parse the blueprint table to extract customer-facing sentences.")
+        else:
+            # Find the header and determine the index of the 'Example' column
+            headers = table_match[0].strip('|').split('|')
+            headers = [header.strip().lower() for header in headers]
+            if 'example' not in headers:
+                st.warning("The blueprint table does not contain an 'Example' column.")
+            else:
+                example_index = headers.index('example')
+                # Extract examples from each row
+                examples = []
+                for row in table_match[2:]:  # Skip header and separator
+                    cells = row.strip('|').split('|')
+                    if len(cells) > example_index:
+                        example = cells[example_index].strip()
+                        if example:
+                            examples.append(f"- {example}")
+                if examples:
+                    customer_sentences = "\n".join(examples)
+                    st.markdown("### 📝 Customer-Facing Sentences")
+                    st.markdown("**Copy the customer-facing sentences below:**")
+                    st.markdown(f"```text\n{customer_sentences}\n```")
+                else:
+                    st.warning("No customer-facing sentences found in the 'Example' column.")
+
