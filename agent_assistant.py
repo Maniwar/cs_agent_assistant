@@ -2,13 +2,13 @@ import streamlit as st
 import pandas as pd
 from io import StringIO
 import re
-import openai
+import openai  # Ensure you have openai installed and configured
 
 # ---------------------------------------------------
 # 1. Initialize OpenAI Client
 # ---------------------------------------------------
-# Ensure you have set the OPENAI_API_KEY in your Streamlit secrets
-client = openai.ChatCompletion.create  # Using OpenAI's ChatCompletion API directly
+# Ensure your OpenAI API key is set in Streamlit secrets as 'OPENAI_API_KEY'
+openai.api_key = st.secrets['OPENAI_API_KEY']
 
 # ---------------------------------------------------
 # 2. Define Helper Functions
@@ -47,27 +47,21 @@ def generate_response(input_type, input_text):
             st.error("Invalid input type selected.")
             return None
 
-        # Create the message payload
-        messages = [
-            {"role": "system", "content": system_message},
-            {"role": "user", "content": user_message},
-        ]
-
-        # Generate the AI response
-        response = client(
-            model="gpt-4",  # Ensure you have access to the correct model
-            messages=messages,
+        # Create the ChatCompletion
+        response = openai.ChatCompletion.create(
+            model="gpt-4",  # Ensure you're using the correct model
+            messages=[
+                {"role": "system", "content": system_message},
+                {"role": "user", "content": user_message},
+            ],
             temperature=0.3,
-            max_tokens=1600,  # Adjusted to a reasonable limit
+            max_tokens=1600,  # Adjust as needed
             n=1,
             stop=None,
-            presence_penalty=0,
-            frequency_penalty=0,
-            user="user-identifier"
         )
 
         ai_response = response.choices[0].message.content.strip()
-        # Remove "Response: " prefix if present
+        # Optionally remove "Response: " prefix if present
         if ai_response.lower().startswith("response:"):
             ai_response = ai_response[len("response:"):].strip()
 
@@ -100,23 +94,16 @@ def generate_blueprint(input_type, input_text):
             "Ensure each step is actionable and includes specific examples to guide the agent."
         )
 
-        # Create the message payload
-        messages = [
-            {"role": "system", "content": system_message},
-            {"role": "user", "content": user_message}
-        ]
-
-        # Generate the blueprint
-        blueprint_response = client(
-            model="gpt-4",  # Ensure you have access to the correct model
-            messages=messages,
+        blueprint_response = openai.ChatCompletion.create(
+            model="gpt-4",  # Ensure you're using the correct model
+            messages=[
+                {"role": "system", "content": system_message},
+                {"role": "user", "content": user_message}
+            ],
             temperature=0.3,
-            max_tokens=400,  # Adjusted to a reasonable limit
+            max_tokens=800,  # Adjust as needed
             n=1,
             stop=None,
-            presence_penalty=0,
-            frequency_penalty=0,
-            user="user-identifier"
         ).choices[0].message.content.strip()
 
         return blueprint_response
@@ -163,6 +150,7 @@ def inject_css(theme):
     if theme == "dark":
         card_background = "#2c2f33"
         ai_response_bg = "#23272a"
+        ai_response_border = "#7289da"
         table_header_bg = "#7289da"
         table_row_even_bg = "#23272a"
         text_color = "#ffffff"
@@ -170,6 +158,7 @@ def inject_css(theme):
         # Light theme colors
         card_background = "#ffffff"
         ai_response_bg = "#f0f0f0"
+        ai_response_border = "#007bff"
         table_header_bg = "#007bff"
         table_row_even_bg = "#f8f9fa"
         text_color = "#000000"
@@ -191,7 +180,7 @@ def inject_css(theme):
         /* AI Response Styling */
         .ai-response {{
             background-color: {ai_response_bg};
-            border-left: 6px solid {table_header_bg};
+            border-left: 6px solid {ai_response_border};
             padding: 15px;
             border-radius: 8px;
             font-size: 16px;
@@ -275,7 +264,7 @@ with st.sidebar:
             1. **Input Type:** Choose between a full customer message or a brief phrase.
             2. **Enter Input:** Provide the customer's message or the brief phrase.
             3. **Generate:** Click the "Generate" button to receive a response and a tailored interaction blueprint.
-            4. **Copy:** Use the copy buttons below each section to copy the generated content for your communications.
+            4. **Copy:** Use the copy buttons above each section to copy the generated content for your communications.
             """
         )
     
@@ -345,9 +334,18 @@ with output_col:
     # ---------------------------------------------------
     if response:
         st.markdown("### 📄 Generated Response")
-        response_markdown = f"```markdown\n{response}\n```"
-        st.markdown(response_markdown)
-        st.markdown("*Use the copy button above the code block to copy the response.*")
+        # Display the AI response within a styled card
+        st.markdown(
+            f"""<div class="card">
+                    <div class="ai-response">
+                        {response}
+                    </div>
+                </div>""",
+            unsafe_allow_html=True
+        )
+        # Display the copy button using st.code to utilize native copy functionality
+        st.code(response, language='text', line_numbers=False)
+        st.markdown("_Click the copy button in the top-right corner of the code block to copy the response._")
 
     # ---------------------------------------------------
     # 10. Display Blueprint
@@ -356,16 +354,26 @@ with output_col:
         blueprint_df = parse_markdown_table(blueprint)
         if blueprint_df is not None:
             st.markdown("### 📋 Interaction Blueprint")
-            blueprint_markdown = f"```markdown\n{blueprint}\n```"
-            st.markdown(blueprint_markdown)
-            st.markdown("*Use the copy button above the code block to copy the blueprint.*")
+            # Convert DataFrame back to markdown table
+            blueprint_markdown = blueprint_df.to_markdown(index=False)
+            # Display the blueprint within a styled card
+            st.markdown(
+                f"""<div class="card">
+                        <div class="ai-response">
+                            {blueprint_markdown}
+                        </div>
+                    </div>""",
+                unsafe_allow_html=True
+            )
+            # Display the copy button using st.code to utilize native copy functionality
+            st.code(blueprint_markdown, language='markdown', line_numbers=False)
+            st.markdown("_Click the copy button in the top-right corner of the code block to copy the blueprint._")
         else:
             st.warning("Could not parse the blueprint table. Please ensure the AI provides a valid markdown table.")
             st.text(blueprint)
 
 # ---------------------------------------------------
-# 11. Inject JavaScript for Copy Functionality
+# 11. Inject JavaScript for Enhanced Copy Feedback (Optional)
 # ---------------------------------------------------
-# Since we're using Streamlit's native copy buttons in code blocks, no additional JavaScript is required.
-# Users can click the copy button that appears in the top-right corner of each code block.
-
+# Optional: Provide JavaScript for enhanced copy feedback or additional functionalities
+# Currently, using Streamlit's native copy buttons, so no additional JS is required
