@@ -3,7 +3,6 @@ import pandas as pd
 from io import StringIO
 import re
 from openai import OpenAI
-import streamlit.components.v1 as components
 
 # ---------------------------------------------------
 # 1. Initialize OpenAI Client
@@ -50,7 +49,7 @@ def generate_response(input_type, input_text):
             return None
 
         response = client.chat.completions.create(
-            model="gpt-4o-mini",  # Ensure this is the correct model name
+            model="gpt-4",  # Ensure this is the correct model name
             messages=[
                 {"role": "system", "content": system_message},
                 {"role": "user", "content": user_message},
@@ -142,9 +141,8 @@ def parse_markdown_table(md_table):
 # ---------------------------------------------------
 # 3. Define Function to Inject Theme-Aware CSS
 # ---------------------------------------------------
-def inject_css():
+def inject_css(theme):
     # Define colors based on the theme
-    theme = get_current_theme()
     if theme == "dark":
         card_background = "#2c2f33"
         ai_response_bg = "#23272a"
@@ -175,8 +173,8 @@ def inject_css():
             box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
             padding: 20px;
             margin-bottom: 20px;
-            color: {text_color};
             transition: background-color 0.3s ease, color 0.3s ease;
+            color: {text_color};
         }}
 
         /* AI Response Styling */
@@ -265,7 +263,7 @@ st.set_page_config(
 )
 
 # ---------------------------------------------------
-# 5. Retrieve the Current Theme
+# 5. Retrieve the Current Theme and Inject CSS
 # ---------------------------------------------------
 def get_current_theme():
     try:
@@ -275,15 +273,13 @@ def get_current_theme():
         # Fallback for older Streamlit versions
         return "light"
 
-# Inject the CSS based on the current theme
-inject_css()
+theme_mode = get_current_theme()
+inject_css(theme_mode)
 
 # ---------------------------------------------------
-# 6. Title and Instructions
+# 6. Sidebar: How to Use
 # ---------------------------------------------------
-st.markdown("<h1 style='text-align: center;'>👩‍💻 Customer Service Assistant</h1>", unsafe_allow_html=True)
-
-with st.expander("ℹ️ How to Use"):
+with st.sidebar.expander("ℹ️ How to Use"):
     st.markdown(
         """
         This app generates professional and empathetic responses to customer inquiries.
@@ -340,37 +336,11 @@ with output_col:
                 unsafe_allow_html=True
             )
 
-            # JavaScript for copying the AI response
-            copy_response_js = f"""
-            <script>
-            function copyToClipboard() {{
-                var element = document.getElementById("{response_div_id}");
-                var textarea = document.createElement("textarea");
-                textarea.value = element.innerText;
-                document.body.appendChild(textarea);
-                textarea.select();
-                try {{
-                    var successful = document.execCommand('copy');
-                    if (successful) {{
-                        alert('Copied the response to clipboard!');
-                    }} else {{
-                        alert('Failed to copy the response.');
-                    }}
-                }} catch (err) {{
-                    alert('Browser does not support copying.');
-                }}
-                document.body.removeChild(textarea);
-            }}
-            </script>
-            """
-
-            # Button to trigger the copy function
+            # Embed JavaScript copy button for AI Response
             copy_response_button = f"""
-            <button class="copy-button" onclick="copyToClipboard()">📋 Copy Response</button>
+            <button class="copy-button" onclick="copyToClipboard('{response_div_id}')">📋 Copy Response</button>
             """
-
-            # Embed the JavaScript and button
-            components.html(copy_response_js + copy_response_button, height=60)
+            st.markdown(copy_response_button, unsafe_allow_html=True)
 
         # ---------------------------------------------------
         # 9. Display Blueprint
@@ -392,43 +362,39 @@ with output_col:
                     unsafe_allow_html=True
                 )
 
-                # JavaScript for copying the blueprint
-                copy_blueprint_js = f"""
-                <script>
-                function copyBlueprintToClipboard() {{
-                    var element = document.getElementById("{blueprint_div_id}");
-                    var textarea = document.createElement("textarea");
-                    textarea.value = element.innerText;
-                    document.body.appendChild(textarea);
-                    textarea.select();
-                    try {{
-                        var successful = document.execCommand('copy');
-                        if (successful) {{
-                            alert('Copied the blueprint to clipboard!');
-                        }} else {{
-                            alert('Failed to copy the blueprint.');
-                        }}
-                    }} catch (err) {{
-                        alert('Browser does not support copying.');
-                    }}
-                    document.body.removeChild(textarea);
-                }}
-                </script>
-                """
-
-                # Button to trigger the copy function
+                # Embed JavaScript copy button for Blueprint
                 copy_blueprint_button = f"""
-                <button class="copy-button" onclick="copyBlueprintToClipboard()">📋 Copy Blueprint</button>
+                <button class="copy-button" onclick="copyToClipboard('{blueprint_div_id}')">📋 Copy Blueprint</button>
                 """
-
-                # Embed the JavaScript and button
-                components.html(copy_blueprint_js + copy_blueprint_button, height=60)
+                st.markdown(copy_blueprint_button, unsafe_allow_html=True)
             else:
                 st.warning("Could not parse the blueprint table. Please ensure the AI provides a valid markdown table.")
                 st.text(blueprint)
 
 # ---------------------------------------------------
-# 10. Collapsible Privacy Statement
+# 10. Inject JavaScript for Copy Functionality
+# ---------------------------------------------------
+copy_js = """
+<script>
+function copyToClipboard(elementId) {
+    var element = document.getElementById(elementId);
+    if (element) {
+        // Use the Clipboard API
+        navigator.clipboard.writeText(element.innerText).then(function() {
+            alert('Copied to clipboard!');
+        }, function(err) {
+            alert('Failed to copy text.');
+        });
+    } else {
+        alert('Element not found!');
+    }
+}
+</script>
+"""
+st.markdown(copy_js, unsafe_allow_html=True)
+
+# ---------------------------------------------------
+# 11. Collapsible Privacy Statement
 # ---------------------------------------------------
 with st.expander('🔒 Data Privacy Statement', expanded=False):
     st.markdown(
