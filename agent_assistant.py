@@ -149,27 +149,7 @@ def parse_markdown_table(md_table):
         return None
 
 # ---------------------------------------------------
-# 3. Define Helper Function for Copying to Clipboard
-# ---------------------------------------------------
-def get_clipboard_js(text):
-    """
-    Generates JavaScript code to copy the provided text to the clipboard.
-    """
-    clipboard_js = f"""
-    <script>
-    function copyToClipboard(text) {{
-        navigator.clipboard.writeText(text).then(function() {{
-            alert('Copied to clipboard!');
-        }}, function(err) {{
-            alert('Failed to copy text.');
-        }});
-    }}
-    </script>
-    """
-    return clipboard_js
-
-# ---------------------------------------------------
-# 4. Define Function to Inject Theme-Aware CSS
+# 3. Define Function to Inject Theme-Aware CSS
 # ---------------------------------------------------
 def inject_css(theme):
     # Define colors based on the theme
@@ -247,35 +227,10 @@ def inject_css(theme):
             transition: background-color 0.3s ease, color 0.3s ease;
         }}
 
-        /* Button Styling */
-        .copy-button {{
-            background-color: {button_bg};
-            color: white;
-            border: none;
-            padding: 10px 16px;
-            text-align: center;
-            text-decoration: none;
-            display: inline-block;
-            font-size: 14px;
-            margin-top: 10px;
-            border-radius: 8px;
-            cursor: pointer;
-            transition: background-color 0.3s ease;
-        }}
-
-        .copy-button:hover {{
-            background-color: {button_hover_bg};
-        }}
-
         /* Responsive Layout */
         @media (max-width: 768px) {{
             .card {{
                 padding: 15px;
-            }}
-
-            .copy-button {{
-                width: 100%;
-                padding: 12px 0;
             }}
         }}
         </style>
@@ -284,7 +239,7 @@ def inject_css(theme):
     )
 
 # ---------------------------------------------------
-# 5. Set Page Configuration
+# 4. Set Page Configuration
 # ---------------------------------------------------
 st.set_page_config(
     page_title="👩‍💻 Customer Service Assistant",
@@ -293,7 +248,7 @@ st.set_page_config(
 )
 
 # ---------------------------------------------------
-# 6. Retrieve the Current Theme and Inject CSS
+# 5. Retrieve the Current Theme and Inject CSS
 # ---------------------------------------------------
 def get_current_theme():
     try:
@@ -307,7 +262,7 @@ theme_mode = get_current_theme()
 inject_css(theme_mode)
 
 # ---------------------------------------------------
-# 7. Sidebar: How to Use and Privacy Statement
+# 6. Sidebar: How to Use and Privacy Statement
 # ---------------------------------------------------
 with st.sidebar:
     with st.sidebar.expander("ℹ️ How to Use"):
@@ -319,7 +274,7 @@ with st.sidebar:
             1. **Input Type:** Choose between a full customer message or a brief phrase.
             2. **Enter Input:** Provide the customer's message or the brief phrase.
             3. **Generate:** Click the "Generate" button to receive a response and a tailored interaction blueprint.
-            4. **Copy:** Use the "Copy Response" and "Copy Blueprint" buttons to copy the generated content for your communications.
+            4. **Copy:** Use the "Copy Response" and "Copy Blueprint" sections to copy the generated content for your communications.
             """
         )
     
@@ -341,12 +296,12 @@ with st.sidebar:
         )
 
 # ---------------------------------------------------
-# 8. Title in the Main Area
+# 7. Title in the Main Area
 # ---------------------------------------------------
 st.markdown("<h1 style='text-align: center;'>👩‍💻 Customer Service Assistant</h1>", unsafe_allow_html=True)
 
 # ---------------------------------------------------
-# 9. Layout with Two Columns: Input and Output
+# 8. Layout with Two Columns: Input and Output
 # ---------------------------------------------------
 input_col, output_col = st.columns([1, 2])
 
@@ -366,7 +321,7 @@ with input_col:
         )
         submit_button = st.form_submit_button(label='Generate')
     
-    # Prevent empty submissions by validating input
+    # Handle form submission
     if submit_button:
         if not input_text.strip():
             st.warning("Please enter some input to generate a response.")
@@ -385,75 +340,58 @@ with output_col:
     blueprint = st.session_state.get('blueprint', None)
     
     # ---------------------------------------------------
-    # 10. Display AI Response
+    # 9. Display AI Response
     # ---------------------------------------------------
     if response:
         st.markdown("### 📄 Generated Response")
-        response_div_id = "aiResponse"
-        st.markdown(
-            f"""<div class="ai-response" id="{response_div_id}">
-                {response}
-            </div>""",
-            unsafe_allow_html=True
-        )
-        # Copy Response Button
-        if st.button("📋 Copy Response"):
-            st.write(f'<script>copyToClipboard("{response_div_id}")</script>', unsafe_allow_html=True)
-            st.success("Response copied to clipboard!")
-
+        response_markdown = f"```text\n{response}\n```"
+        st.markdown(response_markdown)
+    
     # ---------------------------------------------------
-    # 11. Display Blueprint
+    # 10. Display Blueprint
     # ---------------------------------------------------
     if blueprint:
         blueprint_df = parse_markdown_table(blueprint)
         if blueprint_df is not None:
             st.markdown("### 📋 Interaction Blueprint")
-            blueprint_div_id = "blueprint"
-            st.markdown(
-                f"""<div class="card" id="{blueprint_div_id}">
-                    {blueprint_df.to_html(index=False, classes='blueprint-table')}
-                </div>""",
-                unsafe_allow_html=True
-            )
-            # Copy Blueprint Button
-            if st.button("📋 Copy Blueprint"):
-                st.write(f'<script>copyToClipboard("{blueprint_div_id}")</script>', unsafe_allow_html=True)
-                st.success("Blueprint copied to clipboard!")
+            blueprint_markdown = f"```markdown\n{blueprint}\n```"
+            st.markdown(blueprint_markdown)
         else:
             st.warning("Could not parse the blueprint table. Please ensure the AI provides a valid markdown table.")
             st.text(blueprint)
 
 # ---------------------------------------------------
-# 12. Inject JavaScript for Copy Functionality
+# 11. Inject JavaScript for Copy Functionality
 # ---------------------------------------------------
 def get_clipboard_js():
+    """
+    Generates JavaScript code to copy text to the clipboard.
+    """
     clipboard_js = """
     <script>
-    function copyToClipboard(elementId) {
-        var element = document.getElementById(elementId);
-        if (element) {
-            var textarea = document.createElement("textarea");
-            textarea.value = element.innerText;
-            document.body.appendChild(textarea);
-            textarea.select();
-            try {
-                var successful = document.execCommand('copy');
-                if (successful) {
-                    // Notify Streamlit about the successful copy
-                    Streamlit.setComponentValue("copied");
-                } else {
-                    Streamlit.setComponentValue("failed");
-                }
-            } catch (err) {
-                Streamlit.setComponentValue("failed");
-            }
-            document.body.removeChild(textarea);
-        } else {
-            Streamlit.setComponentValue("element_not_found");
-        }
+    function copyToClipboard(text) {
+        navigator.clipboard.writeText(text).then(function() {
+            alert('Copied to clipboard!');
+        }, function(err) {
+            alert('Failed to copy text.');
+        });
     }
     </script>
     """
     return clipboard_js
 
 st.markdown(get_clipboard_js(), unsafe_allow_html=True)
+
+# ---------------------------------------------------
+# 12. Provide Copy Buttons Using Native Components
+# ---------------------------------------------------
+with output_col:
+    if response:
+        # Button to copy AI Response
+        if st.button("📋 Copy Response"):
+            st.write(f'<script>copyToClipboard("{response}")</script>', unsafe_allow_html=True)
+    
+    if blueprint:
+        # Button to copy Blueprint
+        if st.button("📋 Copy Blueprint"):
+            st.write(f'<script>copyToClipboard("{blueprint}")</script>', unsafe_allow_html=True)
