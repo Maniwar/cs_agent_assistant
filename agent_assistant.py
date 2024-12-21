@@ -124,8 +124,18 @@ def parse_markdown_table(md_table):
     if not table_match:
         return None
 
-    # Join the table lines
-    table_str = "\n".join(table_match)
+    # Find the starting point of the table
+    table_start = None
+    for i, line in enumerate(table_match):
+        if re.match(r'\|[-:]+\|', line):
+            table_start = i
+            break
+
+    if table_start is None:
+        return None
+
+    # Extract the table from the matched lines
+    table_str = "\n".join(table_match[table_start - 1:])
 
     # Read the table into a DataFrame
     try:
@@ -311,7 +321,12 @@ with st.sidebar:
         )
 
 # ---------------------------------------------------
-# 7. Layout with Two Columns: Input and Output
+# 7. Title in the Main Area
+# ---------------------------------------------------
+st.markdown("<h1 style='text-align: center;'>👩‍💻 Customer Service Assistant</h1>", unsafe_allow_html=True)
+
+# ---------------------------------------------------
+# 8. Layout with Two Columns: Input and Output
 # ---------------------------------------------------
 input_col, output_col = st.columns([1, 2])
 
@@ -328,7 +343,7 @@ with input_col:
         key="input_text",
         height=200,
     )
-    generate_button = st.button(label='Generate', key='generate_button')
+    generate_button = st.button(label='Generate', key='generate_button', disabled=not input_text.strip())
 
 with output_col:
     if generate_button:
@@ -340,7 +355,7 @@ with output_col:
                 blueprint = generate_blueprint(input_type, input_text) if response else None
 
         # ---------------------------------------------------
-        # 8. Display AI Response
+        # 9. Display AI Response
         # ---------------------------------------------------
         if response:
             st.markdown("### 📄 Generated Response")
@@ -358,7 +373,7 @@ with output_col:
             st.markdown(copy_response_button, unsafe_allow_html=True)
 
         # ---------------------------------------------------
-        # 9. Display Blueprint
+        # 10. Display Blueprint
         # ---------------------------------------------------
         if blueprint:
             blueprint_df = parse_markdown_table(blueprint)
@@ -381,7 +396,7 @@ with output_col:
                 st.text(blueprint)
 
 # ---------------------------------------------------
-# 10. Inject JavaScript for Copy Functionality
+# 11. Inject JavaScript for Copy Functionality
 # ---------------------------------------------------
 copy_js = """
 <script>
