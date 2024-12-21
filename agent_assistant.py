@@ -49,7 +49,7 @@ def generate_response(input_type, input_text):
             return None
 
         response = client.chat.completions.create(
-            model="gpt-4",  # Replace with the correct model name if different
+            model="gpt-4",  # Ensure this is the correct model name
             messages=[
                 {"role": "system", "content": system_message},
                 {"role": "user", "content": user_message},
@@ -98,13 +98,13 @@ def generate_blueprint(input_type, input_text):
         )
 
         blueprint_response = client.chat.completions.create(
-            model="gpt-4",  # Replace with the correct model name if different
+            model="gpt-4o-mini",  # Ensure this is the correct model name
             messages=[
                 {"role": "system", "content": system_message},
                 {"role": "user", "content": user_message}
             ],
             temperature=0.3,
-            max_tokens=4000,
+            max_tokens=16000,
             n=1,
             stop=None,
             presence_penalty=0,
@@ -141,60 +141,84 @@ def parse_markdown_table(md_table):
 # ---------------------------------------------------
 # 3. Define Function to Inject Theme-Aware CSS
 # ---------------------------------------------------
-def inject_css():
+def inject_css(theme):
+    # Define colors based on the theme
+    if theme == "dark":
+        card_background = "#2c2f33"
+        ai_response_bg = "#23272a"
+        ai_response_border = "#7289da"
+        table_header_bg = "#7289da"
+        table_row_even_bg = "#23272a"
+        button_bg = "#7289da"
+        button_hover_bg = "#99aab5"
+        text_color = "#ffffff"
+    else:
+        # Light theme colors
+        card_background = "#ffffff"
+        ai_response_bg = "#f0f0f0"
+        ai_response_border = "#007bff"
+        table_header_bg = "#007bff"
+        table_row_even_bg = "#f8f9fa"
+        button_bg = "#007bff"
+        button_hover_bg = "#0056b3"
+        text_color = "#000000"
+
     st.markdown(
-        """
+        f"""
         <style>
-        /* Ensure all elements adapt to the current theme */
-        .card {
-            background-color: var(--card-background);
+        /* Card Styling */
+        .card {{
+            background-color: {card_background};
             border-radius: 12px;
             box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
             padding: 20px;
             margin-bottom: 20px;
             transition: background-color 0.3s ease, color 0.3s ease;
-        }
+        }}
 
-        .ai-response {
-            background-color: var(--ai-response-bg);
-            border-left: 6px solid var(--ai-response-border);
+        /* AI Response Styling */
+        .ai-response {{
+            background-color: {ai_response_bg};
+            border-left: 6px solid {ai_response_border};
             padding: 15px;
             border-radius: 8px;
             font-size: 16px;
             line-height: 1.6;
-            color: var(--text-color);
+            color: {text_color};
             transition: background-color 0.3s ease, color 0.3s ease;
-        }
+        }}
 
-        .blueprint-table {
+        /* Blueprint Table Styling */
+        .blueprint-table {{
             width: 100%;
             border-collapse: collapse;
             margin-top: 10px;
             transition: background-color 0.3s ease, color 0.3s ease;
-        }
+        }}
 
-        .blueprint-table th, .blueprint-table td {
+        .blueprint-table th, .blueprint-table td {{
             border: 1px solid #ddd;
             padding: 12px 15px;
             text-align: left;
-            color: var(--text-color);
+            color: {text_color};
             transition: background-color 0.3s ease, color 0.3s ease;
-        }
+        }}
 
-        .blueprint-table th {
-            background-color: var(--table-header-bg);
-            color: white;
+        .blueprint-table th {{
+            background-color: {table_header_bg};
+            color: #ffffff;
             font-weight: 600;
             transition: background-color 0.3s ease, color 0.3s ease;
-        }
+        }}
 
-        .blueprint-table tr:nth-child(even) {
-            background-color: var(--table-row-even-bg);
+        .blueprint-table tr:nth-child(even) {{
+            background-color: {table_row_even_bg};
             transition: background-color 0.3s ease, color 0.3s ease;
-        }
+        }}
 
-        .copy-button {
-            background-color: var(--button-bg);
+        /* Button Styling */
+        .copy-button {{
+            background-color: {button_bg};
             color: white;
             border: none;
             padding: 10px 16px;
@@ -206,23 +230,23 @@ def inject_css():
             border-radius: 8px;
             cursor: pointer;
             transition: background-color 0.3s ease;
-        }
+        }}
 
-        .copy-button:hover {
-            background-color: var(--button-hover-bg);
-        }
+        .copy-button:hover {{
+            background-color: {button_hover_bg};
+        }}
 
         /* Responsive Layout */
-        @media (max-width: 768px) {
-            .card {
+        @media (max-width: 768px) {{
+            .card {{
                 padding: 15px;
-            }
+            }}
 
-            .copy-button {
+            .copy-button {{
                 width: 100%;
                 padding: 12px 0;
-            }
-        }
+            }}
+        }}
         </style>
         """,
         unsafe_allow_html=True
@@ -249,7 +273,7 @@ def get_current_theme():
         return "light"
 
 theme_mode = get_current_theme()
-inject_css()
+inject_css(theme_mode)
 
 # ---------------------------------------------------
 # 6. Title and Instructions
@@ -305,11 +329,10 @@ with output_col:
             st.markdown(
                 f"""
                 <div class="card">
-                    <div class="ai-response">
+                    <div class="ai-response" id="aiResponse">
                         {response}
                     </div>
                     <button class="copy-button" onclick="copyToClipboard('aiResponse')">📋 Copy Response</button>
-                    <textarea id="aiResponse" style="opacity:0; position:absolute; left:-9999px;">{response}</textarea>
                 </div>
                 """,
                 unsafe_allow_html=True
@@ -328,8 +351,7 @@ with output_col:
                     <div class="card">
                         <h3>📋 Interaction Blueprint:</h3>
                         {blueprint_table_html}
-                        <button class="copy-button" onclick="copyToClipboard('blueprintResponse')">📋 Copy Blueprint</button>
-                        <textarea id="blueprintResponse" style="opacity:0; position:absolute; left:-9999px;">{blueprint}</textarea>
+                        <button class="copy-button" onclick="copyToClipboard('blueprint')">📋 Copy Blueprint</button>
                     </div>
                     """,
                     unsafe_allow_html=True
@@ -345,13 +367,27 @@ with output_col:
             """
             <script>
             function copyToClipboard(elementId) {
-                var copyText = document.getElementById(elementId);
-                copyText.style.display = "block";
-                copyText.select();
-                copyText.setSelectionRange(0, 99999); /* For mobile devices */
-                document.execCommand("copy");
-                copyText.style.display = "none";
-                alert("Copied to clipboard!");
+                var element = document.getElementById(elementId);
+                if (element) {
+                    var range = document.createRange();
+                    range.selectNodeContents(element);
+                    var selection = window.getSelection();
+                    selection.removeAllRanges();
+                    selection.addRange(range);
+                    try {
+                        var successful = document.execCommand('copy');
+                        if (successful) {
+                            alert('Copied to clipboard!');
+                        } else {
+                            alert('Failed to copy text.');
+                        }
+                    } catch (err) {
+                        alert('Browser does not support copying.');
+                    }
+                    selection.removeAllRanges();
+                } else {
+                    alert('Element not found!');
+                }
             }
             </script>
             """,
@@ -359,7 +395,7 @@ with output_col:
         )
 
 # ---------------------------------------------------
-# 8. Collapsible Privacy Statement
+# 11. Collapsible Privacy Statement
 # ---------------------------------------------------
 with st.expander('🔒 Data Privacy Statement', expanded=False):
     st.markdown(
