@@ -4,7 +4,18 @@ import pandas as pd
 from io import StringIO
 import re
 
-# Function to inject custom CSS
+# ---------------------------------------------------
+# 1. Set Page Configuration
+# ---------------------------------------------------
+st.set_page_config(
+    page_title="👩‍💻 Customer Service Assistant",
+    layout="wide",
+    initial_sidebar_state="expanded"
+)
+
+# ---------------------------------------------------
+# 2. Inject Custom CSS for Modern UI
+# ---------------------------------------------------
 def inject_css():
     st.markdown(
         """
@@ -97,18 +108,18 @@ def inject_css():
 # Inject the CSS into the app
 inject_css()
 
-# Initialize OpenAI client with the specified model
+# ---------------------------------------------------
+# 3. Initialize OpenAI Client
+# ---------------------------------------------------
 client = OpenAI(
     api_key=st.secrets['OPENAI_API_KEY']
 )  # This is also the default, it can be omitted
 
-# Configure the Streamlit page
-st.set_page_config(page_title="👩‍💻 Customer Service Assistant", layout="wide")
-
-# Title
+# ---------------------------------------------------
+# 4. Title and Instructions
+# ---------------------------------------------------
 st.title("👩‍💻 Customer Service Assistant")
 
-# Collapsible Instructions
 with st.expander("ℹ️ How to Use"):
     st.markdown(
         """
@@ -119,7 +130,9 @@ with st.expander("ℹ️ How to Use"):
         """
     )
 
-# Layout with two columns: Input and Output
+# ---------------------------------------------------
+# 5. Layout with Two Columns: Input and Output
+# ---------------------------------------------------
 input_col, output_col = st.columns([1, 2])
 
 with input_col:
@@ -143,7 +156,9 @@ with output_col:
             st.warning("Please enter some input to generate a response.")
         else:
             with st.spinner("Generating response and blueprint..."):
-                # Function to generate AI response
+                # ---------------------------------------------------
+                # 6. Define Functions
+                # ---------------------------------------------------
                 def generate_response(input_type, input_text):
                     if input_type == "Customer's Message":
                         user_message = f"Respond to the customer: {input_text}"
@@ -191,7 +206,7 @@ with output_col:
                     #         "}\n\n"
                     #         "Provide as many keyphrases as possible within your token limit. Format it as a dictionary. You must create as many as possible."
                     #     )
-
+                
                     response = client.chat.completions.create(
                         model="gpt-4o-mini",  # Ensure this is the correct model name with hyphen
                         messages=[
@@ -206,7 +221,7 @@ with output_col:
                         frequency_penalty=0,
                         user="user-identifier"
                     )
-
+                
                     ai_response = response.choices[0].message.content.strip()
                     # Remove "Response: " prefix if present
                     if ai_response.lower().startswith("response:"):
@@ -214,10 +229,9 @@ with output_col:
                     
                     # Escape backslashes in ai_response to prevent f-string issues
                     ai_response = ai_response.replace('\\', '\\\\')
-
+                
                     return ai_response
-
-                # Function to generate Blueprint
+                
                 def generate_blueprint(input_type, input_text):
                     if input_type == "Customer's Message":
                         user_message = f"Based on the following customer message, provide a step-by-step interaction blueprint focusing on loyalty, ownership, and trust. Present it in a table format with columns: Step, Action, Example.\n\nCustomer Message: {input_text}"
@@ -226,14 +240,14 @@ with output_col:
                     # elif input_type == "Create Keyphrase":
                     #     user_message = f"Generate a blueprint based on the following keyphrase: {input_text}"
                     #     # Define system_message if necessary
-
+                
                     system_message = (
                         "You are an expert in customer service interactions. Based on the provided input, create a detailed "
                         "blueprint that outlines a step-by-step strategy for handling the interaction. Focus on fostering loyalty, "
                         "ownership, and trust. Present the blueprint in a clear table format with three columns: Step, Action, Example. "
                         "Ensure each step is actionable and includes specific examples to guide the agent."
                     )
-
+                
                     blueprint_response = client.chat.completions.create(
                         model="gpt-4o-mini",
                         messages=[
@@ -248,22 +262,21 @@ with output_col:
                         frequency_penalty=0,
                         user="user-identifier"
                     ).choices[0].message.content.strip()
-
+                
                     # Escape backslashes in blueprint_response to prevent f-string issues
                     blueprint_response = blueprint_response.replace('\\', '\\\\')
-
+                
                     return blueprint_response
-
-                # Function to parse markdown table to DataFrame
+                
                 def parse_markdown_table(md_table):
                     # Extract the markdown table using regex
                     table_match = re.findall(r'\|.*\|', md_table)
                     if not table_match:
                         return None
-
+                
                     # Join the table lines
                     table_str = "\n".join(table_match)
-
+                
                     # Read the table into a DataFrame
                     try:
                         df = pd.read_csv(StringIO(table_str), sep='|').dropna(axis=1, how='all').dropna(axis=0, how='all')
@@ -274,12 +287,16 @@ with output_col:
                     except Exception as e:
                         st.error(f"Error parsing the blueprint table: {e}")
                         return None
-
-                # Generate AI Response and Blueprint
+                
+                # ---------------------------------------------------
+                # 7. Generate AI Response and Blueprint
+                # ---------------------------------------------------
                 response = generate_response(input_type, input_text)
                 blueprint = generate_blueprint(input_type, input_text) if response else None
-
-                # Display AI Response
+                
+                # ---------------------------------------------------
+                # 8. Display AI Response
+                # ---------------------------------------------------
                 if response:
                     st.markdown(
                         f"""
@@ -293,8 +310,10 @@ with output_col:
                         """,
                         unsafe_allow_html=True
                     )
-
-                # Display Blueprint
+                
+                # ---------------------------------------------------
+                # 9. Display Blueprint
+                # ---------------------------------------------------
                 if blueprint:
                     blueprint_df = parse_markdown_table(blueprint)
                     if blueprint_df is not None:
@@ -314,8 +333,10 @@ with output_col:
                     else:
                         st.warning("Could not parse the blueprint table. Please ensure the AI provides a valid markdown table.")
                         st.text(blueprint)
-
-                # Inject JavaScript for Copy Functionality
+                
+                # ---------------------------------------------------
+                # 10. Inject JavaScript for Copy Functionality
+                # ---------------------------------------------------
                 st.markdown(
                     """
                     <script>
@@ -333,7 +354,9 @@ with output_col:
                     unsafe_allow_html=True
                 )
 
-# Collapsible Privacy Statement
+# ---------------------------------------------------
+# 6. Collapsible Privacy Statement
+# ---------------------------------------------------
 with st.expander('🔒 Data Privacy Statement', expanded=False):
     st.markdown(
         """
