@@ -149,7 +149,27 @@ def parse_markdown_table(md_table):
         return None
 
 # ---------------------------------------------------
-# 3. Define Function to Inject Theme-Aware CSS
+# 3. Define Helper Function for Copying to Clipboard
+# ---------------------------------------------------
+def get_clipboard_js(text):
+    """
+    Generates JavaScript code to copy the provided text to the clipboard.
+    """
+    clipboard_js = f"""
+    <script>
+    function copyToClipboard(text) {{
+        navigator.clipboard.writeText(text).then(function() {{
+            alert('Copied to clipboard!');
+        }}, function(err) {{
+            alert('Failed to copy text.');
+        }});
+    }}
+    </script>
+    """
+    return clipboard_js
+
+# ---------------------------------------------------
+# 4. Define Function to Inject Theme-Aware CSS
 # ---------------------------------------------------
 def inject_css(theme):
     # Define colors based on the theme
@@ -264,7 +284,7 @@ def inject_css(theme):
     )
 
 # ---------------------------------------------------
-# 4. Set Page Configuration
+# 5. Set Page Configuration
 # ---------------------------------------------------
 st.set_page_config(
     page_title="👩‍💻 Customer Service Assistant",
@@ -273,7 +293,7 @@ st.set_page_config(
 )
 
 # ---------------------------------------------------
-# 5. Retrieve the Current Theme and Inject CSS
+# 6. Retrieve the Current Theme and Inject CSS
 # ---------------------------------------------------
 def get_current_theme():
     try:
@@ -287,7 +307,7 @@ theme_mode = get_current_theme()
 inject_css(theme_mode)
 
 # ---------------------------------------------------
-# 6. Sidebar: How to Use and Privacy Statement
+# 7. Sidebar: How to Use and Privacy Statement
 # ---------------------------------------------------
 with st.sidebar:
     with st.sidebar.expander("ℹ️ How to Use"):
@@ -321,12 +341,12 @@ with st.sidebar:
         )
 
 # ---------------------------------------------------
-# 7. Title in the Main Area
+# 8. Title in the Main Area
 # ---------------------------------------------------
 st.markdown("<h1 style='text-align: center;'>👩‍💻 Customer Service Assistant</h1>", unsafe_allow_html=True)
 
 # ---------------------------------------------------
-# 8. Layout with Two Columns: Input and Output
+# 9. Layout with Two Columns: Input and Output
 # ---------------------------------------------------
 input_col, output_col = st.columns([1, 2])
 
@@ -365,7 +385,7 @@ with output_col:
     blueprint = st.session_state.get('blueprint', None)
     
     # ---------------------------------------------------
-    # 9. Display AI Response
+    # 10. Display AI Response
     # ---------------------------------------------------
     if response:
         st.markdown("### 📄 Generated Response")
@@ -377,13 +397,12 @@ with output_col:
             unsafe_allow_html=True
         )
         # Copy Response Button
-        copy_response_button = f"""
-        <button class="copy-button" onclick="copyToClipboard('{response_div_id}')">📋 Copy Response</button>
-        """
-        st.markdown(copy_response_button, unsafe_allow_html=True)
+        if st.button("📋 Copy Response"):
+            st.write(f'<script>copyToClipboard("{response_div_id}")</script>', unsafe_allow_html=True)
+            st.success("Response copied to clipboard!")
 
     # ---------------------------------------------------
-    # 10. Display Blueprint
+    # 11. Display Blueprint
     # ---------------------------------------------------
     if blueprint:
         blueprint_df = parse_markdown_table(blueprint)
@@ -397,33 +416,44 @@ with output_col:
                 unsafe_allow_html=True
             )
             # Copy Blueprint Button
-            copy_blueprint_button = f"""
-            <button class="copy-button" onclick="copyToClipboard('{blueprint_div_id}')">📋 Copy Blueprint</button>
-            """
-            st.markdown(copy_blueprint_button, unsafe_allow_html=True)
+            if st.button("📋 Copy Blueprint"):
+                st.write(f'<script>copyToClipboard("{blueprint_div_id}")</script>', unsafe_allow_html=True)
+                st.success("Blueprint copied to clipboard!")
         else:
             st.warning("Could not parse the blueprint table. Please ensure the AI provides a valid markdown table.")
             st.text(blueprint)
 
 # ---------------------------------------------------
-# 11. Inject JavaScript for Copy Functionality and Confirmation Pop-Up
+# 12. Inject JavaScript for Copy Functionality
 # ---------------------------------------------------
-copy_js = """
-<script>
-function copyToClipboard(elementId) {
-    var element = document.getElementById(elementId);
-    if (element) {
-        // Use the Clipboard API
-        navigator.clipboard.writeText(element.innerText).then(function() {
-            // Show a non-intrusive confirmation pop-up using alert
-            alert('Copied to clipboard!');
-        }, function(err) {
-            alert('Failed to copy text.');
-        });
-    } else {
-        alert('Element not found!');
+def get_clipboard_js():
+    clipboard_js = """
+    <script>
+    function copyToClipboard(elementId) {
+        var element = document.getElementById(elementId);
+        if (element) {
+            var textarea = document.createElement("textarea");
+            textarea.value = element.innerText;
+            document.body.appendChild(textarea);
+            textarea.select();
+            try {
+                var successful = document.execCommand('copy');
+                if (successful) {
+                    // Notify Streamlit about the successful copy
+                    Streamlit.setComponentValue("copied");
+                } else {
+                    Streamlit.setComponentValue("failed");
+                }
+            } catch (err) {
+                Streamlit.setComponentValue("failed");
+            }
+            document.body.removeChild(textarea);
+        } else {
+            Streamlit.setComponentValue("element_not_found");
+        }
     }
-}
-</script>
-"""
-st.markdown(copy_js, unsafe_allow_html=True)
+    </script>
+    """
+    return clipboard_js
+
+st.markdown(get_clipboard_js(), unsafe_allow_html=True)
