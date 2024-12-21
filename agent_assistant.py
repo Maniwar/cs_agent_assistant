@@ -159,8 +159,6 @@ def inject_css(theme):
         ai_response_border = "#7289da"
         table_header_bg = "#7289da"
         table_row_even_bg = "#23272a"
-        button_bg = "#7289da"
-        button_hover_bg = "#99aab5"
         text_color = "#ffffff"
     else:
         # Light theme colors
@@ -169,8 +167,6 @@ def inject_css(theme):
         ai_response_border = "#007bff"
         table_header_bg = "#007bff"
         table_row_even_bg = "#f8f9fa"
-        button_bg = "#007bff"
-        button_hover_bg = "#0056b3"
         text_color = "#000000"
 
     st.markdown(
@@ -274,7 +270,7 @@ with st.sidebar:
             1. **Input Type:** Choose between a full customer message or a brief phrase.
             2. **Enter Input:** Provide the customer's message or the brief phrase.
             3. **Generate:** Click the "Generate" button to receive a response and a tailored interaction blueprint.
-            4. **Copy:** Use the "Copy Response" and "Copy Blueprint" sections to copy the generated content for your communications.
+            4. **Copy:** Use the copy buttons below each section to copy the generated content for your communications.
             """
         )
     
@@ -344,8 +340,10 @@ with output_col:
     # ---------------------------------------------------
     if response:
         st.markdown("### 📄 Generated Response")
+        # Display the AI response within a markdown code block for formatting and copy functionality
         response_markdown = f"```text\n{response}\n```"
         st.markdown(response_markdown)
+        st.markdown("_Use the copy button above the code block to copy the response._")
     
     # ---------------------------------------------------
     # 10. Display Blueprint
@@ -354,8 +352,10 @@ with output_col:
         blueprint_df = parse_markdown_table(blueprint)
         if blueprint_df is not None:
             st.markdown("### 📋 Interaction Blueprint")
+            # Display the blueprint as a markdown table within a code block for formatting and copy functionality
             blueprint_markdown = f"```markdown\n{blueprint}\n```"
             st.markdown(blueprint_markdown)
+            st.markdown("_Use the copy button above the code block to copy the blueprint._")
         else:
             st.warning("Could not parse the blueprint table. Please ensure the AI provides a valid markdown table.")
             st.text(blueprint)
@@ -369,29 +369,28 @@ def get_clipboard_js():
     """
     clipboard_js = """
     <script>
-    function copyToClipboard(text) {
-        navigator.clipboard.writeText(text).then(function() {
-            alert('Copied to clipboard!');
-        }, function(err) {
-            alert('Failed to copy text.');
+    // Function to copy text from code blocks
+    document.addEventListener("DOMContentLoaded", function() {
+        // Select all copy buttons
+        const copyButtons = document.querySelectorAll('button[aria-label="Copy code"]');
+
+        copyButtons.forEach(button => {
+            button.addEventListener('click', () => {
+                // Find the code block associated with the button
+                const codeBlock = button.parentElement.querySelector('pre code');
+                if (codeBlock) {
+                    const text = codeBlock.innerText;
+                    navigator.clipboard.writeText(text).then(function() {
+                        alert('Copied to clipboard!');
+                    }, function(err) {
+                        alert('Failed to copy text.');
+                    });
+                }
+            });
         });
-    }
+    });
     </script>
     """
     return clipboard_js
 
 st.markdown(get_clipboard_js(), unsafe_allow_html=True)
-
-# ---------------------------------------------------
-# 12. Provide Copy Buttons Using Native Components
-# ---------------------------------------------------
-with output_col:
-    if response:
-        # Button to copy AI Response
-        if st.button("📋 Copy Response"):
-            st.write(f'<script>copyToClipboard("{response}")</script>', unsafe_allow_html=True)
-    
-    if blueprint:
-        # Button to copy Blueprint
-        if st.button("📋 Copy Blueprint"):
-            st.write(f'<script>copyToClipboard("{blueprint}")</script>', unsafe_allow_html=True)
