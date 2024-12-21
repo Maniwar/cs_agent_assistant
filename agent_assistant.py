@@ -286,7 +286,7 @@ with output_col:
                         ai_response = ai_response.replace('\\', '\\\\')
                     
                         return ai_response
-                    
+                
                 def generate_blueprint(input_type, input_text):
                     try:
                         if input_type == "Customer's Message":
@@ -296,14 +296,14 @@ with output_col:
                         # elif input_type == "Create Keyphrase":
                         #     user_message = f"Generate a blueprint based on the following keyphrase: {input_text}"
                         #     # Define system_message if necessary
-                
+                    
                         system_message = (
                             "You are an expert in customer service interactions. Based on the provided input, create a detailed "
                             "blueprint that outlines a step-by-step strategy for handling the interaction. Focus on fostering loyalty, "
                             "ownership, and trust. Present the blueprint in a clear table format with three columns: Step, Action, Example. "
                             "Ensure each step is actionable and includes specific examples to guide the agent."
                         )
-                
+                    
                         blueprint_response = client.chat.completions.create(
                             model="gpt-4o-mini",
                             messages=[
@@ -318,10 +318,10 @@ with output_col:
                             frequency_penalty=0,
                             user="user-identifier"
                         ).choices[0].message.content.strip()
-                
+                    
                         # Escape backslashes in blueprint_response to prevent f-string issues
                         blueprint_response = blueprint_response.replace('\\', '\\\\')
-                
+                    
                         return blueprint_response
                     except Exception as e:
                         st.error(f"An error occurred while generating the blueprint: {e}")
