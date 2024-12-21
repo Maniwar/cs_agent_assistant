@@ -1,5 +1,6 @@
 import streamlit as st
 from openai import OpenAI  # Ensure this import aligns with your OpenAI library version
+import re
 
 # ---------------------------------------------------
 # 1. Initialize OpenAI Client
