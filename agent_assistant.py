@@ -49,7 +49,7 @@ def generate_response(input_type, input_text):
             return None
 
         response = client.chat.completions.create(
-            model="gpt-4",  # Ensure this is the correct model name
+            model="gpt-4o-mini",  # Ensure this is the correct model name
             messages=[
                 {"role": "system", "content": system_message},
                 {"role": "user", "content": user_message},
@@ -98,7 +98,7 @@ def generate_blueprint(input_type, input_text):
         )
 
         blueprint_response = client.chat.completions.create(
-            model="gpt-4",  # Ensure this is the correct model name
+            model="gpt-4o-mini",  # Ensure this is the correct model name
             messages=[
                 {"role": "system", "content": system_message},
                 {"role": "user", "content": user_message}
@@ -277,20 +277,38 @@ theme_mode = get_current_theme()
 inject_css(theme_mode)
 
 # ---------------------------------------------------
-# 6. Sidebar: How to Use
+# 6. Sidebar: How to Use and Privacy Statement
 # ---------------------------------------------------
-with st.sidebar.expander("ℹ️ How to Use"):
-    st.markdown(
-        """
-        This app generates professional and empathetic responses to customer inquiries.
+with st.sidebar:
+    with st.sidebar.expander("ℹ️ How to Use"):
+        st.markdown(
+            """
+            This app generates professional and empathetic responses to customer inquiries.
 
-        **Steps to Use:**
-        1. **Input Type:** Choose between a full customer message or a brief phrase.
-        2. **Enter Input:** Provide the customer's message or the brief phrase.
-        3. **Generate:** Click the "Generate" button to receive a response and a tailored interaction blueprint.
-        4. **Copy:** Use the "Copy Response" and "Copy Blueprint" buttons to copy the generated content for your communications.
-        """
-    )
+            **Steps to Use:**
+            1. **Input Type:** Choose between a full customer message or a brief phrase.
+            2. **Enter Input:** Provide the customer's message or the brief phrase.
+            3. **Generate:** Click the "Generate" button to receive a response and a tailored interaction blueprint.
+            4. **Copy:** Use the "Copy Response" and "Copy Blueprint" buttons to copy the generated content for your communications.
+            """
+        )
+    
+    with st.sidebar.expander("🔒 Data Privacy Statement"):
+        st.markdown(
+            """
+            **Information Collection:** The App collects the customer inquiries and agent phrases you enter when using the App. These inputs are securely transmitted to OpenAI's GPT model to generate professional and empathetic responses.
+            
+            **Information Usage:** Your inquiries and phrases are solely used to provide the App's services, which include generating appropriate responses using OpenAI's GPT model. All data are treated as confidential and are not shared with third parties for any other purpose.
+            
+            **Data Security:** We take data security seriously. We implement measures to protect your data during transmission and storage. However, it's important to note that no system is entirely immune to potential security risks. We recommend avoiding the inclusion of any personally identifiable information or sensitive data in your inquiries or phrases.
+            
+            **Data Retention:** We do not retain your data beyond the immediate scope of generating the AI response. Once the response is generated, any stored copies of your data are promptly deleted.
+            
+            **OpenAI Data Sharing:** By using this app, you agree to share your input data with OpenAI and acknowledge that OpenAI's terms and conditions apply to the processing and use of your data by OpenAI.
+            
+            If you have any concerns or questions about the data privacy practices of the App, please don't hesitate to contact us.
+            """
+        )
 
 # ---------------------------------------------------
 # 7. Layout with Two Columns: Input and Output
@@ -327,16 +345,13 @@ with output_col:
         if response:
             st.markdown("### 📄 Generated Response")
             response_div_id = "aiResponse"
-
-            # Display the AI response within a styled div
             st.markdown(
                 f"""<div class="ai-response" id="{response_div_id}">
                     {response}
                 </div>""",
                 unsafe_allow_html=True
             )
-
-            # Embed JavaScript copy button for AI Response
+            # Copy Response Button
             copy_response_button = f"""
             <button class="copy-button" onclick="copyToClipboard('{response_div_id}')">📋 Copy Response</button>
             """
@@ -350,19 +365,13 @@ with output_col:
             if blueprint_df is not None:
                 st.markdown("### 📋 Interaction Blueprint")
                 blueprint_div_id = "blueprint"
-
-                # Convert DataFrame to HTML table with class 'blueprint-table'
-                blueprint_table_html = blueprint_df.to_html(index=False, classes='blueprint-table')
-
-                # Display the blueprint within a styled div
                 st.markdown(
                     f"""<div class="card" id="{blueprint_div_id}">
-                        {blueprint_table_html}
+                        {blueprint_df.to_html(index=False, classes='blueprint-table')}
                     </div>""",
                     unsafe_allow_html=True
                 )
-
-                # Embed JavaScript copy button for Blueprint
+                # Copy Blueprint Button
                 copy_blueprint_button = f"""
                 <button class="copy-button" onclick="copyToClipboard('{blueprint_div_id}')">📋 Copy Blueprint</button>
                 """
@@ -392,23 +401,3 @@ function copyToClipboard(elementId) {
 </script>
 """
 st.markdown(copy_js, unsafe_allow_html=True)
-
-# ---------------------------------------------------
-# 11. Collapsible Privacy Statement
-# ---------------------------------------------------
-with st.expander('🔒 Data Privacy Statement', expanded=False):
-    st.markdown(
-        """
-        **Information Collection:** The App collects the customer inquiries and agent phrases you enter when using the App. These inputs are securely transmitted to OpenAI's GPT model to generate professional and empathetic responses.
-        
-        **Information Usage:** Your inquiries and phrases are solely used to provide the App's services, which include generating appropriate responses using OpenAI's GPT model. All data are treated as confidential and are not shared with third parties for any other purpose.
-        
-        **Data Security:** We take data security seriously. We implement measures to protect your data during transmission and storage. However, it's important to note that no system is entirely immune to potential security risks. We recommend avoiding the inclusion of any personally identifiable information or sensitive data in your inquiries or phrases.
-        
-        **Data Retention:** We do not retain your data beyond the immediate scope of generating the AI response. Once the response is generated, any stored copies of your data are promptly deleted.
-        
-        **OpenAI Data Sharing:** By using this app, you agree to share your input data with OpenAI and acknowledge that OpenAI's terms and conditions apply to the processing and use of your data by OpenAI.
-        
-        If you have any concerns or questions about the data privacy practices of the App, please don't hesitate to contact us.
-        """
-    )
