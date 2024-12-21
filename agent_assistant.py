@@ -4,6 +4,99 @@ import pandas as pd
 from io import StringIO
 import re
 
+# Function to inject custom CSS
+def inject_css():
+    st.markdown(
+        """
+        <style>
+        /* General Styling */
+        body {
+            background-color: #f5f5f7;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+        }
+
+        /* Card Styling */
+        .card {
+            background-color: #ffffff;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+
+        /* AI Response Styling */
+        .ai-response {
+            background-color: #e5f4ff;
+            border-left: 6px solid #3b82f6;
+            padding: 15px;
+            border-radius: 8px;
+            font-size: 16px;
+            line-height: 1.6;
+            color: #1f2937;
+        }
+
+        /* Blueprint Table Styling */
+        .blueprint-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+        }
+
+        .blueprint-table th, .blueprint-table td {
+            border: 1px solid #ddd;
+            padding: 12px 15px;
+            text-align: left;
+        }
+
+        .blueprint-table th {
+            background-color: #3b82f6;
+            color: white;
+            font-weight: 600;
+        }
+
+        .blueprint-table tr:nth-child(even) {
+            background-color: #f2f2f2;
+        }
+
+        /* Button Styling */
+        .copy-button {
+            background-color: #3b82f6;
+            color: white;
+            border: none;
+            padding: 10px 16px;
+            text-align: center;
+            text-decoration: none;
+            display: inline-block;
+            font-size: 14px;
+            margin-top: 10px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        .copy-button:hover {
+            background-color: #2563eb;
+        }
+
+        /* Responsive Layout */
+        @media (max-width: 768px) {
+            .card {
+                padding: 15px;
+            }
+
+            .copy-button {
+                width: 100%;
+                padding: 12px 0;
+            }
+        }
+        </style>
+        """,
+        unsafe_allow_html=True
+    )
+
+# Inject the CSS into the app
+inject_css()
+
 # Initialize OpenAI client with the specified model
 client = OpenAI(
     api_key=st.secrets['OPENAI_API_KEY']
@@ -98,7 +191,7 @@ with output_col:
                     #         "}\n\n"
                     #         "Provide as many keyphrases as possible within your token limit. Format it as a dictionary. You must create as many as possible."
                     #     )
-                
+
                     response = client.chat.completions.create(
                         model="gpt-4o-mini",  # Ensure this is the correct model name with hyphen
                         messages=[
@@ -113,13 +206,13 @@ with output_col:
                         frequency_penalty=0,
                         user="user-identifier"
                     )
-                
+
                     ai_response = response.choices[0].message.content.strip()
                     # Remove "Response: " prefix if present
                     if ai_response.lower().startswith("response:"):
                         ai_response = ai_response[len("response:"):].strip()
                     return ai_response
-                
+
                 # Function to generate Blueprint
                 def generate_blueprint(input_type, input_text):
                     if input_type == "Customer's Message":
@@ -129,14 +222,14 @@ with output_col:
                     # elif input_type == "Create Keyphrase":
                     #     user_message = f"Generate a blueprint based on the following keyphrase: {input_text}"
                     #     # Define system_message if necessary
-                
+
                     system_message = (
                         "You are an expert in customer service interactions. Based on the provided input, create a detailed "
                         "blueprint that outlines a step-by-step strategy for handling the interaction. Focus on fostering loyalty, "
                         "ownership, and trust. Present the blueprint in a clear table format with three columns: Step, Action, Example. "
                         "Ensure each step is actionable and includes specific examples to guide the agent."
                     )
-                
+
                     blueprint_response = client.chat.completions.create(
                         model="gpt-4o-mini",
                         messages=[
@@ -151,19 +244,19 @@ with output_col:
                         frequency_penalty=0,
                         user="user-identifier"
                     ).choices[0].message.content.strip()
-                
+
                     return blueprint_response
-                
+
                 # Function to parse markdown table to DataFrame
                 def parse_markdown_table(md_table):
                     # Extract the markdown table using regex
                     table_match = re.findall(r'\|.*\|', md_table)
                     if not table_match:
                         return None
-                
+
                     # Join the table lines
                     table_str = "\n".join(table_match)
-                
+
                     # Read the table into a DataFrame
                     try:
                         df = pd.read_csv(StringIO(table_str), sep='|').dropna(axis=1, how='all').dropna(axis=0, how='all')
@@ -174,84 +267,64 @@ with output_col:
                     except Exception as e:
                         st.error(f"Error parsing the blueprint table: {e}")
                         return None
-                
+
                 # Generate AI Response and Blueprint
                 response = generate_response(input_type, input_text)
                 blueprint = generate_blueprint(input_type, input_text) if response else None
-                
+
                 # Display AI Response
                 if response:
-                    with st.container():
-                        st.markdown("### 📝 AI Response:")
-                        st.markdown(
-                            response.replace('\n', '<br>'),
-                            unsafe_allow_html=True
-                        )
-                        # Copy Button for AI Response
-                        st.markdown(
-                            f"""
-                            <div style="margin-top:10px;">
-                                <button onclick="copyToClipboard('aiResponse')" style="padding:5px 10px; background-color:#4CAF50; color:white; border:none; border-radius:4px; cursor:pointer;">
-                                    📋 Copy Response
-                                </button>
-                                <textarea id="aiResponse" style="opacity:0; position:absolute; left:-9999px;">{response}</textarea>
+                    st.markdown(
+                        f"""
+                        <div class="card">
+                            <div class="ai-response">
+                                {response.replace('\n', '<br>')}
                             </div>
-                            <script>
-                            function copyToClipboard(elementId) {{
-                                var copyText = document.getElementById(elementId);
-                                copyText.style.display = "block";
-                                copyText.select();
-                                copyText.setSelectionRange(0, 99999); /* For mobile devices */
-                                document.execCommand("copy");
-                                copyText.style.display = "none";
-                                alert("AI Response copied to clipboard!");
-                            }}
-                            </script>
-                            """,
-                            unsafe_allow_html=True
-                        )
-                
+                            <button class="copy-button" onclick="copyToClipboard('aiResponse')">📋 Copy Response</button>
+                            <textarea id="aiResponse" style="opacity:0; position:absolute; left:-9999px;">{response}</textarea>
+                        </div>
+                        """,
+                        unsafe_allow_html=True
+                    )
+
                 # Display Blueprint
                 if blueprint:
-                    with st.container():
-                        st.markdown("### 📋 Interaction Blueprint:")
-                        st.markdown(
-                            """
-                            The following blueprint provides a tailored step-by-step strategy to handle this customer interaction effectively, focusing on fostering loyalty, ownership, and trust.
-                            """
-                        )
-                        # Attempt to parse the blueprint_response into a DataFrame
-                        blueprint_df = parse_markdown_table(blueprint)
-                
-                        if blueprint_df is not None:
-                            st.table(blueprint_df)
-                        else:
-                            st.warning("Could not parse the blueprint table. Please ensure the AI provides a valid markdown table.")
-                            st.text(blueprint)
-                
-                        # Copy Button for Blueprint
+                    blueprint_df = parse_markdown_table(blueprint)
+                    if blueprint_df is not None:
+                        # Convert DataFrame to HTML table with custom class
+                        blueprint_table_html = blueprint_df.to_html(classes='blueprint-table', index=False, escape=False)
                         st.markdown(
                             f"""
-                            <div style="margin-top:10px;">
-                                <button onclick="copyToClipboard('blueprintResponse')" style="padding:5px 10px; background-color:#4CAF50; color:white; border:none; border-radius:4px; cursor:pointer;">
-                                    📋 Copy Blueprint
-                                </button>
+                            <div class="card">
+                                <h3>📋 Interaction Blueprint:</h3>
+                                {blueprint_table_html}
+                                <button class="copy-button" onclick="copyToClipboard('blueprintResponse')">📋 Copy Blueprint</button>
                                 <textarea id="blueprintResponse" style="opacity:0; position:absolute; left:-9999px;">{blueprint}</textarea>
                             </div>
-                            <script>
-                            function copyToClipboard(elementId) {{
-                                var copyText = document.getElementById(elementId);
-                                copyText.style.display = "block";
-                                copyText.select();
-                                copyText.setSelectionRange(0, 99999); /* For mobile devices */
-                                document.execCommand("copy");
-                                copyText.style.display = "none";
-                                alert("Blueprint copied to clipboard!");
-                            }}
-                            </script>
                             """,
                             unsafe_allow_html=True
                         )
+                    else:
+                        st.warning("Could not parse the blueprint table. Please ensure the AI provides a valid markdown table.")
+                        st.text(blueprint)
+
+                # Inject JavaScript for Copy Functionality
+                st.markdown(
+                    """
+                    <script>
+                    function copyToClipboard(elementId) {
+                        var copyText = document.getElementById(elementId);
+                        copyText.style.display = "block";
+                        copyText.select();
+                        copyText.setSelectionRange(0, 99999); /* For mobile devices */
+                        document.execCommand("copy");
+                        copyText.style.display = "none";
+                        alert("Copied to clipboard!");
+                    }
+                    </script>
+                    """,
+                    unsafe_allow_html=True
+                )
 
 # Collapsible Privacy Statement
 with st.expander('🔒 Data Privacy Statement', expanded=False):
