@@ -1,8 +1,5 @@
 import streamlit as st
-import pandas as pd
-from io import StringIO
-import re
-from openai import OpenAI  # Ensure this import is correct based on your OpenAI library version
+from openai import OpenAI  # Ensure this import aligns with your OpenAI library version
 
 # ---------------------------------------------------
 # 1. Initialize OpenAI Client
@@ -118,36 +115,6 @@ def generate_blueprint(input_type, input_text):
 
     except Exception as e:
         st.error(f"An error occurred while generating the blueprint: {e}")
-        return None
-
-def parse_markdown_table(md_table):
-    # Extract the markdown table using regex
-    table_match = re.findall(r'\|.*\|', md_table)
-    if not table_match:
-        return None
-
-    # Find the starting point of the table
-    table_start = None
-    for i, line in enumerate(table_match):
-        if re.match(r'\|[-:]+\|', line):
-            table_start = i
-            break
-
-    if table_start is None:
-        return None
-
-    # Extract the table from the matched lines
-    table_str = "\n".join(table_match[table_start - 1:])
-
-    # Read the table into a DataFrame
-    try:
-        df = pd.read_csv(StringIO(table_str), sep='|').dropna(axis=1, how='all').dropna(axis=0, how='all')
-        # Remove leading and trailing whitespace from headers and columns
-        df.columns = [col.strip() for col in df.columns]
-        df = df.applymap(lambda x: x.strip() if isinstance(x, str) else x)
-        return df
-    except Exception as e:
-        st.error(f"Error parsing table: {e}")
         return None
 
 # ---------------------------------------------------
@@ -357,23 +324,16 @@ with output_col:
     # 10. Display Blueprint
     # ---------------------------------------------------
     if blueprint:
-        blueprint_df = parse_markdown_table(blueprint)
-        if blueprint_df is not None:
-            st.markdown("### 📋 Interaction Blueprint")
-            # Convert DataFrame back to markdown table for display
-            blueprint_markdown = blueprint_df.to_markdown(index=False)
-            # Display the blueprint within a styled card
-            st.markdown(
-                f"""<div class="card">
-                        <div class="ai-response">
-                            {blueprint_markdown}
-                        </div>
-                    </div>""",
-                unsafe_allow_html=True
-            )
-            # Display the blueprint in a markdown code block with native copy button
-            st.markdown("**Copy the blueprint below:**")
-            st.markdown(f"```markdown\n{blueprint_markdown}\n```")
-        else:
-            st.warning("Could not parse the blueprint table. Please ensure the AI provides a valid markdown table.")
-            st.text(blueprint)
+        st.markdown("### 📋 Interaction Blueprint")
+        # Display the blueprint within a styled card
+        st.markdown(
+            f"""<div class="card">
+                    <div class="ai-response">
+                        {blueprint}
+                    </div>
+                </div>""",
+            unsafe_allow_html=True
+        )
+        # Display the blueprint in a markdown code block with native copy button
+        st.markdown("**Copy the blueprint below:**")
+        st.markdown(f"```markdown\n{blueprint}\n```")
