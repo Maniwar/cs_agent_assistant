@@ -290,20 +290,26 @@ with output_col:
                 def generate_blueprint(input_type, input_text):
                     try:
                         if input_type == "Customer's Message":
-                            user_message = f"Based on the following customer message, provide a step-by-step interaction blueprint focusing on loyalty, ownership, and trust. Present it in a table format with columns: Step, Action, Example.\n\nCustomer Message: {input_text}"
+                            user_message = (
+                                f"Based on the following customer message, provide a step-by-step interaction blueprint focusing on loyalty, ownership, and trust. "
+                                f"Present it in a table format with columns: Step, Action, Example.\n\nCustomer Message: {input_text}"
+                            )
                         elif input_type == "Brief Phrase":
-                            user_message = f"Based on the following brief phrase, provide a step-by-step interaction blueprint focusing on loyalty, ownership, and trust. Present it in a table format with columns: Step, Action, Example.\n\nBrief Phrase: {input_text}"
+                            user_message = (
+                                f"Based on the following brief phrase, provide a step-by-step interaction blueprint focusing on loyalty, ownership, and trust. "
+                                f"Present it in a table format with columns: Step, Action, Example.\n\nBrief Phrase: {input_text}"
+                            )
                         # elif input_type == "Create Keyphrase":
                         #     user_message = f"Generate a blueprint based on the following keyphrase: {input_text}"
                         #     # Define system_message if necessary
-                    
+                
                         system_message = (
                             "You are an expert in customer service interactions. Based on the provided input, create a detailed "
                             "blueprint that outlines a step-by-step strategy for handling the interaction. Focus on fostering loyalty, "
                             "ownership, and trust. Present the blueprint in a clear table format with three columns: Step, Action, Example. "
                             "Ensure each step is actionable and includes specific examples to guide the agent."
                         )
-                    
+                
                         blueprint_response = client.chat.completions.create(
                             model="gpt-4o-mini",
                             messages=[
@@ -318,10 +324,10 @@ with output_col:
                             frequency_penalty=0,
                             user="user-identifier"
                         ).choices[0].message.content.strip()
-                    
+                
                         # Escape backslashes in blueprint_response to prevent f-string issues
                         blueprint_response = blueprint_response.replace('\\', '\\\\')
-                    
+                
                         return blueprint_response
                     except Exception as e:
                         st.error(f"An error occurred while generating the blueprint: {e}")
