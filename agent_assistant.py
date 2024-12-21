@@ -2,14 +2,13 @@ import streamlit as st
 import pandas as pd
 from io import StringIO
 import re
-from openai import OpenAI
+import openai
 
 # ---------------------------------------------------
 # 1. Initialize OpenAI Client
 # ---------------------------------------------------
-client = OpenAI(
-    api_key=st.secrets['OPENAI_API_KEY']
-)  # Ensure your OpenAI API key is correctly set in Streamlit secrets
+# Ensure you have set the OPENAI_API_KEY in your Streamlit secrets
+client = openai.ChatCompletion.create  # Using OpenAI's ChatCompletion API directly
 
 # ---------------------------------------------------
 # 2. Define Helper Functions
@@ -48,14 +47,18 @@ def generate_response(input_type, input_text):
             st.error("Invalid input type selected.")
             return None
 
-        response = client.chat.completions.create(
-            model="gpt-4o-mini",  # Ensure this is the correct model name
-            messages=[
-                {"role": "system", "content": system_message},
-                {"role": "user", "content": user_message},
-            ],
+        # Create the message payload
+        messages = [
+            {"role": "system", "content": system_message},
+            {"role": "user", "content": user_message},
+        ]
+
+        # Generate the AI response
+        response = client(
+            model="gpt-4",  # Ensure you have access to the correct model
+            messages=messages,
             temperature=0.3,
-            max_tokens=16000,
+            max_tokens=1600,  # Adjusted to a reasonable limit
             n=1,
             stop=None,
             presence_penalty=0,
@@ -97,14 +100,18 @@ def generate_blueprint(input_type, input_text):
             "Ensure each step is actionable and includes specific examples to guide the agent."
         )
 
-        blueprint_response = client.chat.completions.create(
-            model="gpt-4o-mini",  # Ensure this is the correct model name
-            messages=[
-                {"role": "system", "content": system_message},
-                {"role": "user", "content": user_message}
-            ],
+        # Create the message payload
+        messages = [
+            {"role": "system", "content": system_message},
+            {"role": "user", "content": user_message}
+        ]
+
+        # Generate the blueprint
+        blueprint_response = client(
+            model="gpt-4",  # Ensure you have access to the correct model
+            messages=messages,
             temperature=0.3,
-            max_tokens=4000,
+            max_tokens=400,  # Adjusted to a reasonable limit
             n=1,
             stop=None,
             presence_penalty=0,
@@ -156,7 +163,6 @@ def inject_css(theme):
     if theme == "dark":
         card_background = "#2c2f33"
         ai_response_bg = "#23272a"
-        ai_response_border = "#7289da"
         table_header_bg = "#7289da"
         table_row_even_bg = "#23272a"
         text_color = "#ffffff"
@@ -164,7 +170,6 @@ def inject_css(theme):
         # Light theme colors
         card_background = "#ffffff"
         ai_response_bg = "#f0f0f0"
-        ai_response_border = "#007bff"
         table_header_bg = "#007bff"
         table_row_even_bg = "#f8f9fa"
         text_color = "#000000"
@@ -186,7 +191,7 @@ def inject_css(theme):
         /* AI Response Styling */
         .ai-response {{
             background-color: {ai_response_bg};
-            border-left: 6px solid {ai_response_border};
+            border-left: 6px solid {table_header_bg};
             padding: 15px;
             border-radius: 8px;
             font-size: 16px;
@@ -340,11 +345,10 @@ with output_col:
     # ---------------------------------------------------
     if response:
         st.markdown("### 📄 Generated Response")
-        # Display the AI response within a markdown code block for formatting and copy functionality
-        response_markdown = f"```text\n{response}\n```"
+        response_markdown = f"```markdown\n{response}\n```"
         st.markdown(response_markdown)
-        st.markdown("_Use the copy button above the code block to copy the response._")
-    
+        st.markdown("*Use the copy button above the code block to copy the response.*")
+
     # ---------------------------------------------------
     # 10. Display Blueprint
     # ---------------------------------------------------
@@ -352,10 +356,9 @@ with output_col:
         blueprint_df = parse_markdown_table(blueprint)
         if blueprint_df is not None:
             st.markdown("### 📋 Interaction Blueprint")
-            # Display the blueprint as a markdown table within a code block for formatting and copy functionality
             blueprint_markdown = f"```markdown\n{blueprint}\n```"
             st.markdown(blueprint_markdown)
-            st.markdown("_Use the copy button above the code block to copy the blueprint._")
+            st.markdown("*Use the copy button above the code block to copy the blueprint.*")
         else:
             st.warning("Could not parse the blueprint table. Please ensure the AI provides a valid markdown table.")
             st.text(blueprint)
@@ -363,34 +366,6 @@ with output_col:
 # ---------------------------------------------------
 # 11. Inject JavaScript for Copy Functionality
 # ---------------------------------------------------
-def get_clipboard_js():
-    """
-    Generates JavaScript code to copy text to the clipboard.
-    """
-    clipboard_js = """
-    <script>
-    // Function to copy text from code blocks
-    document.addEventListener("DOMContentLoaded", function() {
-        // Select all copy buttons
-        const copyButtons = document.querySelectorAll('button[aria-label="Copy code"]');
+# Since we're using Streamlit's native copy buttons in code blocks, no additional JavaScript is required.
+# Users can click the copy button that appears in the top-right corner of each code block.
 
-        copyButtons.forEach(button => {
-            button.addEventListener('click', () => {
-                // Find the code block associated with the button
-                const codeBlock = button.parentElement.querySelector('pre code');
-                if (codeBlock) {
-                    const text = codeBlock.innerText;
-                    navigator.clipboard.writeText(text).then(function() {
-                        alert('Copied to clipboard!');
-                    }, function(err) {
-                        alert('Failed to copy text.');
-                    });
-                }
-            });
-        });
-    });
-    </script>
-    """
-    return clipboard_js
-
-st.markdown(get_clipboard_js(), unsafe_allow_html=True)
