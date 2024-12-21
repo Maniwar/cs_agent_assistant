@@ -2,14 +2,13 @@ import streamlit as st
 import pandas as pd
 from io import StringIO
 import re
-from openai import OpenAI
+import openai  # Ensure you have openai installed and configured
 
 # ---------------------------------------------------
 # 1. Initialize OpenAI Client
 # ---------------------------------------------------
-client = OpenAI(
-    api_key=st.secrets['OPENAI_API_KEY']
-)  # Ensure your OpenAI API key is correctly set in Streamlit secrets
+# Ensure your OpenAI API key is set in Streamlit secrets as 'OPENAI_API_KEY'
+openai.api_key = st.secrets['OPENAI_API_KEY']
 
 # ---------------------------------------------------
 # 2. Define Helper Functions
@@ -48,23 +47,21 @@ def generate_response(input_type, input_text):
             st.error("Invalid input type selected.")
             return None
 
-        response = client.chat.completions.create(
-            model="gpt-4o-mini",  # Ensure this is the correct model name
+        # Create the ChatCompletion
+        response = openai.ChatCompletion.create(
+            model="gpt-4",  # Ensure you're using the correct model
             messages=[
                 {"role": "system", "content": system_message},
                 {"role": "user", "content": user_message},
             ],
             temperature=0.3,
-            max_tokens=16000,
+            max_tokens=1600,  # Adjust as needed
             n=1,
             stop=None,
-            presence_penalty=0,
-            frequency_penalty=0,
-            user="user-identifier"
         )
 
         ai_response = response.choices[0].message.content.strip()
-        # Remove "Response: " prefix if present
+        # Optionally remove "Response: " prefix if present
         if ai_response.lower().startswith("response:"):
             ai_response = ai_response[len("response:"):].strip()
 
@@ -97,19 +94,16 @@ def generate_blueprint(input_type, input_text):
             "Ensure each step is actionable and includes specific examples to guide the agent."
         )
 
-        blueprint_response = client.chat.completions.create(
-            model="gpt-4o-mini",  # Ensure this is the correct model name
+        blueprint_response = openai.ChatCompletion.create(
+            model="gpt-4",  # Ensure you're using the correct model
             messages=[
                 {"role": "system", "content": system_message},
                 {"role": "user", "content": user_message}
             ],
             temperature=0.3,
-            max_tokens=4000,
+            max_tokens=800,  # Adjust as needed
             n=1,
             stop=None,
-            presence_penalty=0,
-            frequency_penalty=0,
-            user="user-identifier"
         ).choices[0].message.content.strip()
 
         return blueprint_response
@@ -159,8 +153,6 @@ def inject_css(theme):
         ai_response_border = "#7289da"
         table_header_bg = "#7289da"
         table_row_even_bg = "#23272a"
-        button_bg = "#7289da"
-        button_hover_bg = "#99aab5"
         text_color = "#ffffff"
     else:
         # Light theme colors
@@ -169,8 +161,6 @@ def inject_css(theme):
         ai_response_border = "#007bff"
         table_header_bg = "#007bff"
         table_row_even_bg = "#f8f9fa"
-        button_bg = "#007bff"
-        button_hover_bg = "#0056b3"
         text_color = "#000000"
 
     st.markdown(
@@ -227,35 +217,10 @@ def inject_css(theme):
             transition: background-color 0.3s ease, color 0.3s ease;
         }}
 
-        /* Button Styling */
-        .copy-button {{
-            background-color: {button_bg};
-            color: white;
-            border: none;
-            padding: 10px 16px;
-            text-align: center;
-            text-decoration: none;
-            display: inline-block;
-            font-size: 14px;
-            margin-top: 10px;
-            border-radius: 8px;
-            cursor: pointer;
-            transition: background-color 0.3s ease;
-        }}
-
-        .copy-button:hover {{
-            background-color: {button_hover_bg};
-        }}
-
         /* Responsive Layout */
         @media (max-width: 768px) {{
             .card {{
                 padding: 15px;
-            }}
-
-            .copy-button {{
-                width: 100%;
-                padding: 12px 0;
             }}
         }}
         </style>
@@ -299,7 +264,7 @@ with st.sidebar:
             1. **Input Type:** Choose between a full customer message or a brief phrase.
             2. **Enter Input:** Provide the customer's message or the brief phrase.
             3. **Generate:** Click the "Generate" button to receive a response and a tailored interaction blueprint.
-            4. **Copy:** Use the "Copy Response" and "Copy Blueprint" buttons to copy the generated content for your communications.
+            4. **Copy:** Use the copy buttons in the code blocks to copy the generated content for your communications.
             """
         )
     
@@ -346,7 +311,7 @@ with input_col:
         )
         submit_button = st.form_submit_button(label='Generate')
     
-    # Prevent empty submissions by validating input
+    # Handle form submission
     if submit_button:
         if not input_text.strip():
             st.warning("Please enter some input to generate a response.")
@@ -369,18 +334,18 @@ with output_col:
     # ---------------------------------------------------
     if response:
         st.markdown("### 📄 Generated Response")
-        response_div_id = "aiResponse"
+        # Display the AI response within a styled card
         st.markdown(
-            f"""<div class="ai-response" id="{response_div_id}">
-                {response}
-            </div>""",
+            f"""<div class="card">
+                    <div class="ai-response">
+                        {response}
+                    </div>
+                </div>""",
             unsafe_allow_html=True
         )
-        # Copy Response Button
-        copy_response_button = f"""
-        <button class="copy-button" onclick="copyToClipboard('{response_div_id}')">📋 Copy Response</button>
-        """
-        st.markdown(copy_response_button, unsafe_allow_html=True)
+        # Display the response in a markdown code block with native copy button
+        st.markdown("**Copy the response below:**")
+        st.code(response, language='text', line_numbers=False)
 
     # ---------------------------------------------------
     # 10. Display Blueprint
@@ -389,41 +354,20 @@ with output_col:
         blueprint_df = parse_markdown_table(blueprint)
         if blueprint_df is not None:
             st.markdown("### 📋 Interaction Blueprint")
-            blueprint_div_id = "blueprint"
+            # Convert DataFrame back to markdown table for display
+            blueprint_markdown = blueprint_df.to_markdown(index=False)
+            # Display the blueprint within a styled card
             st.markdown(
-                f"""<div class="card" id="{blueprint_div_id}">
-                    {blueprint_df.to_html(index=False, classes='blueprint-table')}
-                </div>""",
+                f"""<div class="card">
+                        <div class="ai-response">
+                            {blueprint_markdown}
+                        </div>
+                    </div>""",
                 unsafe_allow_html=True
             )
-            # Copy Blueprint Button
-            copy_blueprint_button = f"""
-            <button class="copy-button" onclick="copyToClipboard('{blueprint_div_id}')">📋 Copy Blueprint</button>
-            """
-            st.markdown(copy_blueprint_button, unsafe_allow_html=True)
+            # Display the blueprint in a markdown code block with native copy button
+            st.markdown("**Copy the blueprint below:**")
+            st.code(blueprint_markdown, language='markdown', line_numbers=False)
         else:
             st.warning("Could not parse the blueprint table. Please ensure the AI provides a valid markdown table.")
             st.text(blueprint)
-
-# ---------------------------------------------------
-# 11. Inject JavaScript for Copy Functionality and Confirmation Pop-Up
-# ---------------------------------------------------
-copy_js = """
-<script>
-function copyToClipboard(elementId) {
-    var element = document.getElementById(elementId);
-    if (element) {
-        // Use the Clipboard API
-        navigator.clipboard.writeText(element.innerText).then(function() {
-            // Show a non-intrusive confirmation pop-up using alert
-            alert('Copied to clipboard!');
-        }, function(err) {
-            alert('Failed to copy text.');
-        });
-    } else {
-        alert('Element not found!');
-    }
-}
-</script>
-"""
-st.markdown(copy_js, unsafe_allow_html=True)
