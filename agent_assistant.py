@@ -2,12 +2,12 @@ import streamlit as st
 import pandas as pd
 from io import StringIO
 import re
-import openai  # Ensure you have openai installed and configured
+import openai  # Correct import for OpenAI
 
 # ---------------------------------------------------
 # 1. Initialize OpenAI Client
 # ---------------------------------------------------
-# Ensure your OpenAI API key is set in Streamlit secrets as 'OPENAI_API_KEY'
+# Set your OpenAI API key from Streamlit secrets
 openai.api_key = st.secrets['OPENAI_API_KEY']
 
 # ---------------------------------------------------
@@ -49,7 +49,7 @@ def generate_response(input_type, input_text):
 
         # Create the ChatCompletion
         response = openai.ChatCompletion.create(
-            model="gpt-4",  # Ensure you're using the correct model
+            model="gpt-4",  # Use the correct model name
             messages=[
                 {"role": "system", "content": system_message},
                 {"role": "user", "content": user_message},
@@ -95,7 +95,7 @@ def generate_blueprint(input_type, input_text):
         )
 
         blueprint_response = openai.ChatCompletion.create(
-            model="gpt-4",  # Ensure you're using the correct model
+            model="gpt-4",  # Use the correct model name
             messages=[
                 {"role": "system", "content": system_message},
                 {"role": "user", "content": user_message}
@@ -150,7 +150,6 @@ def inject_css(theme):
     if theme == "dark":
         card_background = "#2c2f33"
         ai_response_bg = "#23272a"
-        ai_response_border = "#7289da"
         table_header_bg = "#7289da"
         table_row_even_bg = "#23272a"
         text_color = "#ffffff"
@@ -158,7 +157,6 @@ def inject_css(theme):
         # Light theme colors
         card_background = "#ffffff"
         ai_response_bg = "#f0f0f0"
-        ai_response_border = "#007bff"
         table_header_bg = "#007bff"
         table_row_even_bg = "#f8f9fa"
         text_color = "#000000"
@@ -180,7 +178,7 @@ def inject_css(theme):
         /* AI Response Styling */
         .ai-response {{
             background-color: {ai_response_bg};
-            border-left: 6px solid {ai_response_border};
+            border-left: 6px solid {table_header_bg};
             padding: 15px;
             border-radius: 8px;
             font-size: 16px;
@@ -346,7 +344,7 @@ with output_col:
         # Display the response in a markdown code block with native copy button
         st.markdown("**Copy the response below:**")
         st.code(response, language='text', line_numbers=False)
-
+    
     # ---------------------------------------------------
     # 10. Display Blueprint
     # ---------------------------------------------------
