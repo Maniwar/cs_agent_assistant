@@ -1,5 +1,4 @@
 from openai import OpenAI
-import openai  # Import the openai module to access exception classes
 import streamlit as st
 import pandas as pd
 from io import StringIO
@@ -100,36 +99,26 @@ with output_col:
                     #         "Provide as many keyphrases as possible within your token limit. Format it as a dictionary. You must create as many as possible."
                     #     )
                 
-                    try:
-                        response = client.chat.completions.create(
-                            model="gpt4o-mini",  # Ensure this is the correct model name
-                            messages=[
-                                {"role": "system", "content": system_message},
-                                {"role": "user", "content": user_message}
-                            ],
-                            temperature=0.3,
-                            max_tokens=4000,  # Adjusted as per original code
-                            n=1,
-                            stop=None,
-                            presence_penalty=0,
-                            frequency_penalty=0,
-                            user="user-identifier"
-                        )
-                    
-                        ai_response = response.choices[0].message.content.strip()
-                        # Remove "Response: " prefix if present
-                        if ai_response.lower().startswith("response:"):
-                            ai_response = ai_response[len("response:"):].strip()
-                        return ai_response
-                    except openai.InvalidRequestError as e:
-                        st.error(f"Invalid Request: {e}")
-                    except openai.AuthenticationError as e:
-                        st.error(f"Authentication Error: {e}")
-                    except openai.APIConnectionError as e:
-                        st.error(f"API Connection Error: {e}")
-                    except openai.OpenAIError as e:
-                        st.error(f"An error occurred: {e}")
-                    return None
+                    response = client.chat.completions.create(
+                        model="gpt4o-mini",  # Ensure this is the correct model name
+                        messages=[
+                            {"role": "system", "content": system_message},
+                            {"role": "user", "content": user_message}
+                        ],
+                        temperature=0.3,
+                        max_tokens=4000,  # Adjusted as per original code
+                        n=1,
+                        stop=None,
+                        presence_penalty=0,
+                        frequency_penalty=0,
+                        user="user-identifier"
+                    )
+                
+                    ai_response = response.choices[0].message.content.strip()
+                    # Remove "Response: " prefix if present
+                    if ai_response.lower().startswith("response:"):
+                        ai_response = ai_response[len("response:"):].strip()
+                    return ai_response
                 
                 # Function to generate Blueprint
                 def generate_blueprint(input_type, input_text):
@@ -148,32 +137,22 @@ with output_col:
                         "Ensure each step is actionable and includes specific examples to guide the agent."
                     )
                 
-                    try:
-                        blueprint_response = client.chat.completions.create(
-                            model="gpt4o-mini",
-                            messages=[
-                                {"role": "system", "content": system_message},
-                                {"role": "user", "content": user_message}
-                            ],
-                            temperature=0.3,
-                            max_tokens=4000,  # Adjusted as per original code
-                            n=1,
-                            stop=None,
-                            presence_penalty=0,
-                            frequency_penalty=0,
-                            user="user-identifier"
-                        ).choices[0].message.content.strip()
+                    blueprint_response = client.chat.completions.create(
+                        model="gpt4o-mini",
+                        messages=[
+                            {"role": "system", "content": system_message},
+                            {"role": "user", "content": user_message}
+                        ],
+                        temperature=0.3,
+                        max_tokens=4000,  # Adjusted as per original code
+                        n=1,
+                        stop=None,
+                        presence_penalty=0,
+                        frequency_penalty=0,
+                        user="user-identifier"
+                    ).choices[0].message.content.strip()
                 
-                        return blueprint_response
-                    except openai.InvalidRequestError as e:
-                        st.error(f"Invalid Request: {e}")
-                    except openai.AuthenticationError as e:
-                        st.error(f"Authentication Error: {e}")
-                    except openai.APIConnectionError as e:
-                        st.error(f"API Connection Error: {e}")
-                    except openai.OpenAIError as e:
-                        st.error(f"An error occurred: {e}")
-                    return None
+                    return blueprint_response
                 
                 # Function to parse markdown table to DataFrame
                 def parse_markdown_table(md_table):
@@ -273,7 +252,7 @@ with output_col:
                             """,
                             unsafe_allow_html=True
                         )
-    
+
 # Collapsible Privacy Statement
 with st.expander('🔒 Data Privacy Statement', expanded=False):
     st.markdown(
