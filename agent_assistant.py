@@ -42,31 +42,48 @@ def inject_css(theme):
     st.markdown(
         f"""
         <style>
+        :root {{
+            --primary-color: {button_bg};
+            --primary-hover-color: {button_hover_bg};
+            --background-color: {background_color};
+            --card-background: {card_background};
+            --ai-response-bg: {ai_response_bg};
+            --ai-response-border: {ai_response_border};
+            --text-color: {text_color};
+            --table-header-bg: {table_header_bg};
+            --table-row-even-bg: {table_row_even_bg};
+            --button-bg: {button_bg};
+            --button-hover-bg: {button_hover_bg};
+        }}
+
         /* General Styling */
         body {{
-            background-color: {background_color};
+            background-color: var(--background-color);
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
-            color: {text_color};
+            color: var(--text-color);
+            transition: background-color 0.3s ease, color 0.3s ease;
         }}
 
         /* Card Styling */
         .card {{
-            background-color: {card_background};
+            background-color: var(--card-background);
             border-radius: 12px;
             box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
             padding: 20px;
             margin-bottom: 20px;
+            transition: background-color 0.3s ease, color 0.3s ease;
         }}
 
         /* AI Response Styling */
         .ai-response {{
-            background-color: {ai_response_bg};
-            border-left: 6px solid {ai_response_border};
+            background-color: var(--ai-response-bg);
+            border-left: 6px solid var(--ai-response-border);
             padding: 15px;
             border-radius: 8px;
             font-size: 16px;
             line-height: 1.6;
-            color: {text_color};
+            color: var(--text-color);
+            transition: background-color 0.3s ease, color 0.3s ease;
         }}
 
         /* Blueprint Table Styling */
@@ -74,28 +91,32 @@ def inject_css(theme):
             width: 100%;
             border-collapse: collapse;
             margin-top: 10px;
+            transition: background-color 0.3s ease, color 0.3s ease;
         }}
 
         .blueprint-table th, .blueprint-table td {{
             border: 1px solid #ddd;
             padding: 12px 15px;
             text-align: left;
-            color: {text_color};
+            color: var(--text-color);
+            transition: background-color 0.3s ease, color 0.3s ease;
         }}
 
         .blueprint-table th {{
-            background-color: {table_header_bg};
+            background-color: var(--table-header-bg);
             color: white;
             font-weight: 600;
+            transition: background-color 0.3s ease, color 0.3s ease;
         }}
 
         .blueprint-table tr:nth-child(even) {{
-            background-color: {table_row_even_bg};
+            background-color: var(--table-row-even-bg);
+            transition: background-color 0.3s ease, color 0.3s ease;
         }}
 
         /* Button Styling */
         .copy-button {{
-            background-color: {button_bg};
+            background-color: var(--button-bg);
             color: white;
             border: none;
             padding: 10px 16px;
@@ -110,7 +131,7 @@ def inject_css(theme):
         }}
 
         .copy-button:hover {{
-            background-color: {button_hover_bg};
+            background-color: var(--primary-hover-color);
         }}
 
         /* Responsive Layout */
