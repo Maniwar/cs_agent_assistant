@@ -28,7 +28,7 @@ influential techniques such as charm and charisma to create a positive impact on
 experience. Do not use too many common customer service phrases that would result in people tuning out like being overly apologetic. 
 
 Remember, your ultimate objective is to ensure the customer feels satisfied and heard, fostering a sense of positive customer service 
-experience. Ensure that your responses are tailored for chat-based interaction rather than email, embodying immediacy, conversational tone. Your output will be copied and pasted directly to the customer."""
+experience."""
 
         elif input_type == "Brief Phrase":
             user_message = f"Improve this message: {input_text}"
