@@ -49,13 +49,13 @@ def generate_response(input_type, input_text):
             return None
 
         response = client.chat.completions.create(
-            model="gpt-4",  # Ensure this is the correct model name
+            model="gpt-4o-mini",  # Ensure this is the correct model name
             messages=[
                 {"role": "system", "content": system_message},
                 {"role": "user", "content": user_message},
             ],
             temperature=0.3,
-            max_tokens=4000,
+            max_tokens=16000,
             n=1,
             stop=None,
             presence_penalty=0,
@@ -98,13 +98,13 @@ def generate_blueprint(input_type, input_text):
         )
 
         blueprint_response = client.chat.completions.create(
-            model="gpt-4o-mini",  # Ensure this is the correct model name
+            model="gpt-4",  # Ensure this is the correct model name
             messages=[
                 {"role": "system", "content": system_message},
                 {"role": "user", "content": user_message}
             ],
             temperature=0.3,
-            max_tokens=16000,
+            max_tokens=4000,
             n=1,
             stop=None,
             presence_penalty=0,
@@ -326,17 +326,14 @@ with output_col:
         # 8. Display AI Response
         # ---------------------------------------------------
         if response:
+            st.markdown("### 📄 Generated Response")
             st.markdown(
-                f"""
-                <div class="card">
-                    <div class="ai-response" id="aiResponse">
-                        {response}
-                    </div>
-                    <button class="copy-button" onclick="copyToClipboard('aiResponse')">📋 Copy Response</button>
-                </div>
-                """,
+                f"""<div class="ai-response">
+                    {response}
+                </div>""",
                 unsafe_allow_html=True
             )
+            st.copy_button(label="📋 Copy Response", data=response)
 
         # ---------------------------------------------------
         # 9. Display Blueprint
@@ -344,58 +341,15 @@ with output_col:
         if blueprint:
             blueprint_df = parse_markdown_table(blueprint)
             if blueprint_df is not None:
-                # Convert DataFrame to HTML table with custom class
-                blueprint_table_html = blueprint_df.to_html(classes='blueprint-table', index=False, escape=False)
-                st.markdown(
-                    f"""
-                    <div class="card">
-                        <h3>📋 Interaction Blueprint:</h3>
-                        {blueprint_table_html}
-                        <button class="copy-button" onclick="copyToClipboard('blueprint')">📋 Copy Blueprint</button>
-                    </div>
-                    """,
-                    unsafe_allow_html=True
-                )
+                st.markdown("### 📋 Interaction Blueprint")
+                st.dataframe(blueprint_df, use_container_width=True)
+                st.copy_button(label="📋 Copy Blueprint", data=blueprint_df.to_csv(index=False))
             else:
                 st.warning("Could not parse the blueprint table. Please ensure the AI provides a valid markdown table.")
                 st.text(blueprint)
 
-        # ---------------------------------------------------
-        # 10. Inject JavaScript for Copy Functionality
-        # ---------------------------------------------------
-        st.markdown(
-            """
-            <script>
-            function copyToClipboard(elementId) {
-                var element = document.getElementById(elementId);
-                if (element) {
-                    var range = document.createRange();
-                    range.selectNodeContents(element);
-                    var selection = window.getSelection();
-                    selection.removeAllRanges();
-                    selection.addRange(range);
-                    try {
-                        var successful = document.execCommand('copy');
-                        if (successful) {
-                            alert('Copied to clipboard!');
-                        } else {
-                            alert('Failed to copy text.');
-                        }
-                    } catch (err) {
-                        alert('Browser does not support copying.');
-                    }
-                    selection.removeAllRanges();
-                } else {
-                    alert('Element not found!');
-                }
-            }
-            </script>
-            """,
-            unsafe_allow_html=True
-        )
-
 # ---------------------------------------------------
-# 11. Collapsible Privacy Statement
+# 10. Collapsible Privacy Statement
 # ---------------------------------------------------
 with st.expander('🔒 Data Privacy Statement', expanded=False):
     st.markdown(
