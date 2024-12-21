@@ -100,7 +100,7 @@ with output_col:
                     #     )
                 
                     response = client.chat.completions.create(
-                        model="gpt4o-mini",  # Ensure this is the correct model name
+                        model="gpt-4o-mini",  # Ensure this is the correct model name with hyphen
                         messages=[
                             {"role": "system", "content": system_message},
                             {"role": "user", "content": user_message}
@@ -138,7 +138,7 @@ with output_col:
                     )
                 
                     blueprint_response = client.chat.completions.create(
-                        model="gpt4o-mini",
+                        model="gpt-4o-mini",
                         messages=[
                             {"role": "system", "content": system_message},
                             {"role": "user", "content": user_message}
