@@ -3,6 +3,7 @@ import pandas as pd
 from io import StringIO
 import re
 from openai import OpenAI
+import streamlit.components.v1 as components
 
 # ---------------------------------------------------
 # 1. Initialize OpenAI Client
@@ -328,12 +329,16 @@ with output_col:
         if response:
             st.markdown("### 📄 Generated Response")
             st.markdown(
-                f"""<div class="ai-response">
+                f"""<div class="ai-response" id="aiResponse">
                     {response}
                 </div>""",
                 unsafe_allow_html=True
             )
-            st.copy_button(label="📋 Copy Response", data=response)
+            # Embed JavaScript copy button
+            copy_response_html = f"""
+            <button class="copy-button" onclick="copyToClipboard('aiResponse')">📋 Copy Response</button>
+            """
+            components.html(copy_response_html)
 
         # ---------------------------------------------------
         # 9. Display Blueprint
@@ -343,13 +348,56 @@ with output_col:
             if blueprint_df is not None:
                 st.markdown("### 📋 Interaction Blueprint")
                 st.dataframe(blueprint_df, use_container_width=True)
-                st.copy_button(label="📋 Copy Blueprint", data=blueprint_df.to_csv(index=False))
+                # Convert the DataFrame to a string for copying
+                blueprint_str = blueprint_df.to_csv(index=False)
+                st.markdown(
+                    f"""<div class="card" id="blueprint">
+                        {blueprint_df.to_html(index=False)}
+                    </div>""",
+                    unsafe_allow_html=True
+                )
+                copy_blueprint_html = f"""
+                <button class="copy-button" onclick="copyToClipboard('blueprint')">📋 Copy Blueprint</button>
+                """
+                components.html(copy_blueprint_html)
             else:
                 st.warning("Could not parse the blueprint table. Please ensure the AI provides a valid markdown table.")
                 st.text(blueprint)
 
+    # ---------------------------------------------------
+    # 10. Inject JavaScript for Copy Functionality
+    # ---------------------------------------------------
+    copy_js = """
+    <script>
+    function copyToClipboard(elementId) {
+        var element = document.getElementById(elementId);
+        if (element) {
+            // Create a temporary textarea to hold the text
+            var textarea = document.createElement("textarea");
+            textarea.value = element.innerText;
+            document.body.appendChild(textarea);
+            textarea.select();
+            try {
+                var successful = document.execCommand('copy');
+                if (successful) {
+                    alert('Copied to clipboard!');
+                } else {
+                    alert('Failed to copy text.');
+                }
+            } catch (err) {
+                alert('Browser does not support copying.');
+            }
+            document.body.removeChild(textarea);
+        } else {
+            alert('Element not found!');
+        }
+    }
+    </script>
+    """
+    st.markdown(copy_js, unsafe_allow_html=True)
+
 # ---------------------------------------------------
-# 10. Collapsible Privacy Statement
+# 11. Collapsible Privacy Statement
 # ---------------------------------------------------
 with st.expander('🔒 Data Privacy Statement', expanded=False):
     st.markdown(
