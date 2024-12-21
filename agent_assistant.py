@@ -101,7 +101,7 @@ def generate_blueprint(input_type, input_text):
                 {"role": "user", "content": user_message}
             ],
             temperature=0.3,
-            max_tokens=4000,
+            max_tokens=16000,
             n=1,
             stop=None,
             presence_penalty=0,
@@ -306,7 +306,7 @@ with output_col:
         st.markdown("### 📋 Interaction Blueprint")
         
         # Full blueprint in expander
-        with st.expander("View Full Blueprint Table", expanded=False):
+        with st.expander("View Full Blueprint Table", expanded=True):
             st.markdown(
                 f"""<div class="card">
                         <div class="ai-response">
