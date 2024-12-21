@@ -2,13 +2,15 @@ import streamlit as st
 import pandas as pd
 from io import StringIO
 import re
-import openai  # Correct import for OpenAI
+from openai import OpenAI  # Ensure this import is correct based on your OpenAI library version
 
 # ---------------------------------------------------
 # 1. Initialize OpenAI Client
 # ---------------------------------------------------
-# Set your OpenAI API key from Streamlit secrets
-openai.api_key = st.secrets['OPENAI_API_KEY']
+# Initialize the OpenAI client with the API key from Streamlit secrets
+client = OpenAI(
+    api_key=st.secrets['OPENAI_API_KEY']
+)  # Ensure your OpenAI API key is correctly set in Streamlit secrets
 
 # ---------------------------------------------------
 # 2. Define Helper Functions
@@ -48,20 +50,23 @@ def generate_response(input_type, input_text):
             return None
 
         # Create the ChatCompletion
-        response = openai.ChatCompletion.create(
-            model="gpt-4",  # Use the correct model name
+        response = client.chat.completions.create(
+            model="gpt-4o-mini",  # Ensure this is the correct model name
             messages=[
                 {"role": "system", "content": system_message},
                 {"role": "user", "content": user_message},
             ],
             temperature=0.3,
-            max_tokens=1600,  # Adjust as needed
+            max_tokens=16000,
             n=1,
             stop=None,
+            presence_penalty=0,
+            frequency_penalty=0,
+            user="user-identifier"
         )
 
         ai_response = response.choices[0].message.content.strip()
-        # Optionally remove "Response: " prefix if present
+        # Remove "Response: " prefix if present
         if ai_response.lower().startswith("response:"):
             ai_response = ai_response[len("response:"):].strip()
 
@@ -94,16 +99,19 @@ def generate_blueprint(input_type, input_text):
             "Ensure each step is actionable and includes specific examples to guide the agent."
         )
 
-        blueprint_response = openai.ChatCompletion.create(
-            model="gpt-4",  # Use the correct model name
+        blueprint_response = client.chat.completions.create(
+            model="gpt-4o-mini",  # Ensure this is the correct model name
             messages=[
                 {"role": "system", "content": system_message},
                 {"role": "user", "content": user_message}
             ],
             temperature=0.3,
-            max_tokens=800,  # Adjust as needed
+            max_tokens=4000,
             n=1,
             stop=None,
+            presence_penalty=0,
+            frequency_penalty=0,
+            user="user-identifier"
         ).choices[0].message.content.strip()
 
         return blueprint_response
@@ -343,8 +351,8 @@ with output_col:
         )
         # Display the response in a markdown code block with native copy button
         st.markdown("**Copy the response below:**")
-        st.code(response, language='text', line_numbers=False)
-    
+        st.markdown(f"```text\n{response}\n```")
+
     # ---------------------------------------------------
     # 10. Display Blueprint
     # ---------------------------------------------------
@@ -365,7 +373,7 @@ with output_col:
             )
             # Display the blueprint in a markdown code block with native copy button
             st.markdown("**Copy the blueprint below:**")
-            st.code(blueprint_markdown, language='markdown', line_numbers=False)
+            st.markdown(f"```markdown\n{blueprint_markdown}\n```")
         else:
             st.warning("Could not parse the blueprint table. Please ensure the AI provides a valid markdown table.")
             st.text(blueprint)
