@@ -50,7 +50,7 @@ def generate_response(input_type, input_text):
             return None
 
         response = client.chat.completions.create(
-            model="gpt-4o-mini",  # Ensure this is the correct model name
+            model="gpt-4",  # Ensure this is the correct model name
             messages=[
                 {"role": "system", "content": system_message},
                 {"role": "user", "content": user_message},
@@ -328,17 +328,18 @@ with output_col:
         # ---------------------------------------------------
         if response:
             st.markdown("### 📄 Generated Response")
+            response_div_id = "aiResponse"
             st.markdown(
-                f"""<div class="ai-response" id="aiResponse">
+                f"""<div class="ai-response" id="{response_div_id}">
                     {response}
                 </div>""",
                 unsafe_allow_html=True
             )
-            # Embed JavaScript copy button
-            copy_response_html = f"""
-            <button class="copy-button" onclick="copyToClipboard('aiResponse')">📋 Copy Response</button>
+            # Embed JavaScript copy button for AI Response
+            copy_response_button = f"""
+            <button class="copy-button" onclick="copyToClipboard('{response_div_id}')">📋 Copy Response</button>
             """
-            components.html(copy_response_html)
+            components.html(copy_response_button)
 
         # ---------------------------------------------------
         # 9. Display Blueprint
@@ -347,19 +348,18 @@ with output_col:
             blueprint_df = parse_markdown_table(blueprint)
             if blueprint_df is not None:
                 st.markdown("### 📋 Interaction Blueprint")
-                st.dataframe(blueprint_df, use_container_width=True)
-                # Convert the DataFrame to a string for copying
-                blueprint_str = blueprint_df.to_csv(index=False)
+                blueprint_div_id = "blueprint"
                 st.markdown(
-                    f"""<div class="card" id="blueprint">
+                    f"""<div class="card" id="{blueprint_div_id}">
                         {blueprint_df.to_html(index=False)}
                     </div>""",
                     unsafe_allow_html=True
                 )
-                copy_blueprint_html = f"""
-                <button class="copy-button" onclick="copyToClipboard('blueprint')">📋 Copy Blueprint</button>
+                # Embed JavaScript copy button for Blueprint
+                copy_blueprint_button = f"""
+                <button class="copy-button" onclick="copyToClipboard('{blueprint_div_id}')">📋 Copy Blueprint</button>
                 """
-                components.html(copy_blueprint_html)
+                components.html(copy_blueprint_button)
             else:
                 st.warning("Could not parse the blueprint table. Please ensure the AI provides a valid markdown table.")
                 st.text(blueprint)
