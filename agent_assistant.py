@@ -102,7 +102,7 @@ with output_col:
                 
                     try:
                         response = client.chat.completions.create(
-                            model="gpt4o-mini",
+                            model="gpt4o-mini",  # Ensure this is the correct model name
                             messages=[
                                 {"role": "system", "content": system_message},
                                 {"role": "user", "content": user_message}
@@ -273,7 +273,7 @@ with output_col:
                             """,
                             unsafe_allow_html=True
                         )
-
+    
 # Collapsible Privacy Statement
 with st.expander('🔒 Data Privacy Statement', expanded=False):
     st.markdown(
