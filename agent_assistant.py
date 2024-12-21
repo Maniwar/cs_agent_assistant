@@ -317,34 +317,35 @@ with output_col:
             )
             st.markdown("**Copy the full blueprint:**")
             st.code(blueprint, language="markdown")
-        
-# Parse and display individual examples
-    table_match = re.findall(r'\|.*\|', blueprint)
-    if table_match:
-        headers = table_match[0].strip('|').split('|')
-        headers = [header.strip().lower() for header in headers]
-        
-        if 'step' in headers and 'example' in headers:
-            step_index = headers.index('step')
-            example_index = headers.index('example')
             
-            steps_and_examples = []
-            for row in table_match[2:]:  # Skip header and separator
-                cells = row.strip('|').split('|')
-                if len(cells) > max(step_index, example_index):
-                    step = cells[step_index].strip()
-                    example = cells[example_index].strip()
-                    if step and example:
-                        steps_and_examples.append((step, example))
-            
-            if steps_and_examples:
-                st.markdown("### 📝 Customer-Facing Responses")
-                for i, (step, example) in enumerate(steps_and_examples, 1):
-                    st.markdown(f"**Step {i}:**")
-                    st.code(example, language=None)
-            else:
-                st.warning("No customer-facing sentences found in the blueprint.")
-        else:
-            st.warning("The blueprint table is missing required columns (Step and Example).")
-    else:
-        st.warning("Could not parse the blueprint table to extract customer-facing sentences.")
+            # Only try to parse the blueprint if it's a string
+            if isinstance(blueprint, str):
+                table_match = re.findall(r'\|.*\|', blueprint)
+                if table_match:
+                    headers = table_match[0].strip('|').split('|')
+                    headers = [header.strip().lower() for header in headers]
+                    
+                    if 'step' in headers and 'example' in headers:
+                        step_index = headers.index('step')
+                        example_index = headers.index('example')
+                        
+                        steps_and_examples = []
+                        for row in table_match[2:]:  # Skip header and separator
+                            cells = row.strip('|').split('|')
+                            if len(cells) > max(step_index, example_index):
+                                step = cells[step_index].strip()
+                                example = cells[example_index].strip()
+                                if step and example:
+                                    steps_and_examples.append((step, example))
+                        
+                        if steps_and_examples:
+                            st.markdown("### 📝 Customer-Facing Responses")
+                            for i, (step, example) in enumerate(steps_and_examples, 1):
+                                st.markdown(f"**Step {i}:**")
+                                st.code(example, language=None)
+                        else:
+                            st.info("No customer-facing sentences found in the blueprint.")
+                    else:
+                        st.info("The blueprint table is missing required columns (Step and Example).")
+                else:
+                    st.info("Could not parse the blueprint table to extract customer-facing sentences.")
