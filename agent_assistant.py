@@ -261,7 +261,7 @@ with output_col:
                         #         "}\n\n"
                         #         "Provide as many keyphrases as possible within your token limit. Format it as a dictionary. You must create as many as possible."
                         #     )
-        
+                    
                         response = client.chat.completions.create(
                             model="gpt-4o-mini",  # Ensure this is the correct model name with hyphen
                             messages=[
@@ -276,7 +276,7 @@ with output_col:
                             frequency_penalty=0,
                             user="user-identifier"
                         )
-        
+                    
                         ai_response = response.choices[0].message.content.strip()
                         # Remove "Response: " prefix if present
                         if ai_response.lower().startswith("response:"):
@@ -284,9 +284,9 @@ with output_col:
                         
                         # Escape backslashes in ai_response to prevent f-string issues
                         ai_response = ai_response.replace('\\', '\\\\')
-        
+                    
                         return ai_response
-        
+                    
                 def generate_blueprint(input_type, input_text):
                     try:
                         if input_type == "Customer's Message":
@@ -296,14 +296,14 @@ with output_col:
                         # elif input_type == "Create Keyphrase":
                         #     user_message = f"Generate a blueprint based on the following keyphrase: {input_text}"
                         #     # Define system_message if necessary
-        
+                
                         system_message = (
                             "You are an expert in customer service interactions. Based on the provided input, create a detailed "
                             "blueprint that outlines a step-by-step strategy for handling the interaction. Focus on fostering loyalty, "
                             "ownership, and trust. Present the blueprint in a clear table format with three columns: Step, Action, Example. "
                             "Ensure each step is actionable and includes specific examples to guide the agent."
                         )
-        
+                
                         blueprint_response = client.chat.completions.create(
                             model="gpt-4o-mini",
                             messages=[
@@ -318,24 +318,24 @@ with output_col:
                             frequency_penalty=0,
                             user="user-identifier"
                         ).choices[0].message.content.strip()
-        
+                
                         # Escape backslashes in blueprint_response to prevent f-string issues
                         blueprint_response = blueprint_response.replace('\\', '\\\\')
-        
+                
                         return blueprint_response
                     except Exception as e:
                         st.error(f"An error occurred while generating the blueprint: {e}")
                         return None
-        
+                
                 def parse_markdown_table(md_table):
                     # Extract the markdown table using regex
                     table_match = re.findall(r'\|.*\|', md_table)
                     if not table_match:
                         return None
-        
+                
                     # Join the table lines
                     table_str = "\n".join(table_match)
-        
+                
                     # Read the table into a DataFrame
                     try:
                         df = pd.read_csv(StringIO(table_str), sep='|').dropna(axis=1, how='all').dropna(axis=0, how='all')
@@ -346,13 +346,13 @@ with output_col:
                     except Exception as e:
                         st.error(f"Error parsing the blueprint table: {e}")
                         return None
-        
+                
                 # ---------------------------------------------------
                 # 8. Generate AI Response and Blueprint
                 # ---------------------------------------------------
                 response = generate_response(input_type, input_text)
                 blueprint = generate_blueprint(input_type, input_text) if response else None
-        
+                
                 # ---------------------------------------------------
                 # 9. Display AI Response
                 # ---------------------------------------------------
@@ -369,7 +369,7 @@ with output_col:
                         """,
                         unsafe_allow_html=True
                     )
-        
+                
                 # ---------------------------------------------------
                 # 10. Display Blueprint
                 # ---------------------------------------------------
@@ -392,7 +392,7 @@ with output_col:
                     else:
                         st.warning("Could not parse the blueprint table. Please ensure the AI provides a valid markdown table.")
                         st.text(blueprint)
-        
+                
                 # ---------------------------------------------------
                 # 11. Inject JavaScript for Copy Functionality
                 # ---------------------------------------------------
