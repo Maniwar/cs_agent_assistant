@@ -5,13 +5,11 @@ from io import StringIO
 import re
 
 # ---------------------------------------------------
-# 1. Set Page Configuration
+# 1. Initialize OpenAI Client
 # ---------------------------------------------------
-st.set_page_config(
-    page_title="👩‍💻 Customer Service Assistant",
-    layout="wide",
-    initial_sidebar_state="expanded"
-)
+client = OpenAI(
+    api_key=st.secrets['OPENAI_API_KEY']
+)  # Ensure your OpenAI API key is correctly set in Streamlit secrets
 
 # ---------------------------------------------------
 # 2. Define Function to Inject Theme-Aware CSS
@@ -38,7 +36,7 @@ def inject_css(theme):
         table_row_even_bg = "#f2f2f2"
         button_bg = "#3b82f6"
         button_hover_bg = "#2563eb"
-    
+
     st.markdown(
         f"""
         <style>
@@ -151,41 +149,7 @@ def inject_css(theme):
     )
 
 # ---------------------------------------------------
-# 3. Initialize OpenAI Client
-# ---------------------------------------------------
-client = OpenAI(
-    api_key=st.secrets['OPENAI_API_KEY']
-)  # This is also the default, it can be omitted
-
-# ---------------------------------------------------
-# 4. Retrieve the Current Theme and Inject CSS
-# ---------------------------------------------------
-try:
-    current_theme = st.runtime.get_theme()
-    theme_mode = current_theme.base  # 'dark' or 'light'
-except AttributeError:
-    # Fallback for older Streamlit versions
-    theme_mode = "light"
-
-inject_css(theme_mode)
-
-# ---------------------------------------------------
-# 5. Title and Instructions
-# ---------------------------------------------------
-st.title("👩‍💻 Customer Service Assistant")
-
-with st.expander("ℹ️ How to Use"):
-    st.markdown(
-        """
-        This app generates professional and empathetic responses to customer inquiries. 
-        - **Input Type:** Choose between a full customer message or a brief phrase.
-        - **Generate:** Click the "Generate" button to receive a response and a tailored interaction blueprint.
-        - **Copy:** Use the provided buttons to copy the generated content for use in your communications.
-        """
-    )
-
-# ---------------------------------------------------
-# 7. Define Functions for Response and Blueprint
+# 3. Define Helper Functions
 # ---------------------------------------------------
 def generate_response(input_type, input_text):
     try:
@@ -217,48 +181,33 @@ def generate_response(input_type, input_text):
                 "The ultimate objective is to craft a response that leaves the customer feeling understood, valued, and satisfied. Remember, these responses are for a chat interaction, not an email, and will be used directly "
                 "in communication with the customer. Always respond concisely and without unnecessary explanations or greetings, keeping the focus on saving the agent's time. Be sure to provide step by step instructions to the customer where required."
             )
-        # Uncomment and adjust if "Create Keyphrase" is needed in the future
-        # elif input_type == "Create Keyphrase":
-        #     user_message = f"Generate keyphrases for the following subcategories: {input_text}"
-        #     system_message = (
-        #         "Your task is to generate keyphrases or short sentences that customers might use to discuss or inquire about the given subcategories."
-        #         "These would be customer service complaints or NPS detractor type comments. "
-        #         "Think of common phrases, questions, or statements related to each subcategory that customers could use in their interactions. "
-        #         "These keyphrases will be used to enhance semantic sentence co-sign similarity functions for customer comments and transcripts. "
-        #         "Ensure that the generated keyphrases are relevant, concise, and capture the essence of each subcategory."
-        #         "\n\nThe following would be an example of the formatting:\n\n"
-        #         "{\n"
-        #         '    "Main category": {\n'
-        #         '        "subcategory 1": ["Keyphrase 1", "Keyphrase 2", "Keyphrase 3"],\n'
-        #         '        "subcategory 2": ["Keyphrase 1", "Keyphrase 2", "Keyphrase 3"],\n'
-        #         '    }\n'
-        #         "}\n\n"
-        #         "Provide as many keyphrases as possible within your token limit. Format it as a dictionary. You must create as many as possible."
-        #     )
-    
+        else:
+            st.error("Invalid input type selected.")
+            return None
+
         response = client.chat.completions.create(
             model="gpt-4o-mini",  # Ensure this is the correct model name with hyphen
             messages=[
                 {"role": "system", "content": system_message},
-                {"role": "user", "content": user_message}
+                {"role": "user", "content": user_message},
             ],
             temperature=0.3,
-            max_tokens=4000,  # Adjusted as per original code
+            max_tokens=4000,
             n=1,
             stop=None,
             presence_penalty=0,
             frequency_penalty=0,
             user="user-identifier"
         )
-    
+
         ai_response = response.choices[0].message.content.strip()
         # Remove "Response: " prefix if present
         if ai_response.lower().startswith("response:"):
             ai_response = ai_response[len("response:"):].strip()
-        
+
         # Escape backslashes in ai_response to prevent f-string issues
         ai_response = ai_response.replace('\\', '\\\\')
-    
+
         return ai_response
 
     except Exception as e:
@@ -277,17 +226,17 @@ def generate_blueprint(input_type, input_text):
                 f"Based on the following brief phrase, provide a step-by-step interaction blueprint focusing on loyalty, ownership, and trust. "
                 f"Present it in a table format with columns: Step, Action, Example.\n\nBrief Phrase: {input_text}"
             )
-        # elif input_type == "Create Keyphrase":
-        #     user_message = f"Generate a blueprint based on the following keyphrase: {input_text}"
-        #     # Define system_message if necessary
-    
+        else:
+            st.error("Invalid input type selected.")
+            return None
+
         system_message = (
             "You are an expert in customer service interactions. Based on the provided input, create a detailed "
             "blueprint that outlines a step-by-step strategy for handling the interaction. Focus on fostering loyalty, "
             "ownership, and trust. Present the blueprint in a clear table format with three columns: Step, Action, Example. "
             "Ensure each step is actionable and includes specific examples to guide the agent."
         )
-    
+
         blueprint_response = client.chat.completions.create(
             model="gpt-4o-mini",
             messages=[
@@ -295,17 +244,17 @@ def generate_blueprint(input_type, input_text):
                 {"role": "user", "content": user_message}
             ],
             temperature=0.3,
-            max_tokens=4000,  # Adjusted as per original code
+            max_tokens=4000,
             n=1,
             stop=None,
             presence_penalty=0,
             frequency_penalty=0,
             user="user-identifier"
         ).choices[0].message.content.strip()
-    
+
         # Escape backslashes in blueprint_response to prevent f-string issues
         blueprint_response = blueprint_response.replace('\\', '\\\\')
-    
+
         return blueprint_response
 
     except Exception as e:
@@ -333,7 +282,43 @@ def parse_markdown_table(md_table):
         return None
 
 # ---------------------------------------------------
-# 6. Layout with Two Columns: Input and Output
+# 4. Set Page Configuration
+# ---------------------------------------------------
+st.set_page_config(
+    page_title="👩‍💻 Customer Service Assistant",
+    layout="wide",
+    initial_sidebar_state="expanded"
+)
+
+# ---------------------------------------------------
+# 5. Retrieve the Current Theme and Inject CSS
+# ---------------------------------------------------
+try:
+    current_theme = st.runtime.get_theme()
+    theme_mode = current_theme.base  # 'dark' or 'light'
+except AttributeError:
+    # Fallback for older Streamlit versions
+    theme_mode = "light"
+
+inject_css(theme_mode)
+
+# ---------------------------------------------------
+# 6. Title and Instructions
+# ---------------------------------------------------
+st.title("👩‍💻 Customer Service Assistant")
+
+with st.expander("ℹ️ How to Use"):
+    st.markdown(
+        """
+        This app generates professional and empathetic responses to customer inquiries. 
+        - **Input Type:** Choose between a full customer message or a brief phrase.
+        - **Generate:** Click the "Generate" button to receive a response and a tailored interaction blueprint.
+        - **Copy:** Use the provided buttons to copy the generated content for use in your communications.
+        """
+    )
+
+# ---------------------------------------------------
+# 7. Layout with Two Columns: Input and Output
 # ---------------------------------------------------
 input_col, output_col = st.columns([1, 2])
 
@@ -362,7 +347,7 @@ with output_col:
                 blueprint = generate_blueprint(input_type, input_text) if response else None
 
         # ---------------------------------------------------
-        # 9. Display AI Response
+        # 8. Display AI Response
         # ---------------------------------------------------
         if response:
             st.markdown(
@@ -379,7 +364,7 @@ with output_col:
             )
 
         # ---------------------------------------------------
-        # 10. Display Blueprint
+        # 9. Display Blueprint
         # ---------------------------------------------------
         if blueprint:
             blueprint_df = parse_markdown_table(blueprint)
@@ -402,7 +387,7 @@ with output_col:
                 st.text(blueprint)
 
         # ---------------------------------------------------
-        # 11. Inject JavaScript for Copy Functionality
+        # 10. Inject JavaScript for Copy Functionality
         # ---------------------------------------------------
         st.markdown(
             """
@@ -422,7 +407,7 @@ with output_col:
         )
 
 # ---------------------------------------------------
-# 8. Collapsible Privacy Statement
+# 11. Collapsible Privacy Statement
 # ---------------------------------------------------
 with st.expander('🔒 Data Privacy Statement', expanded=False):
     st.markdown(
