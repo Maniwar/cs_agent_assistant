@@ -49,7 +49,7 @@ def generate_response(input_type, input_text):
 
         # Create the ChatCompletion
         response = openai.ChatCompletion.create(
-            model="gpt-4",  # Ensure you're using the correct model
+            model="gpt-4o-mini",  # Ensure you're using the correct model
             messages=[
                 {"role": "system", "content": system_message},
                 {"role": "user", "content": user_message},
