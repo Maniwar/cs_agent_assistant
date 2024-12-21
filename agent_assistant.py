@@ -50,7 +50,7 @@ def generate_response(input_type, input_text):
             return None
 
         response = client.chat.completions.create(
-            model="gpt-4o-mini",  # Ensure this is the correct model name
+            model="gpt-4",  # Ensure this is the correct model name
             messages=[
                 {"role": "system", "content": system_message},
                 {"role": "user", "content": user_message},
@@ -140,118 +140,9 @@ def parse_markdown_table(md_table):
         return None
 
 # ---------------------------------------------------
-# 3. Define Function to Inject Theme-Aware CSS
+# 3. Remove the Global CSS Injection
 # ---------------------------------------------------
-def inject_css(theme):
-    # Define colors based on the theme
-    if theme == "dark":
-        card_background = "#2c2f33"
-        ai_response_bg = "#23272a"
-        ai_response_border = "#7289da"
-        table_header_bg = "#7289da"
-        table_row_even_bg = "#23272a"
-        button_bg = "#7289da"
-        button_hover_bg = "#99aab5"
-        text_color = "#ffffff"
-    else:
-        # Light theme colors
-        card_background = "#ffffff"
-        ai_response_bg = "#f0f0f0"
-        ai_response_border = "#007bff"
-        table_header_bg = "#007bff"
-        table_row_even_bg = "#f8f9fa"
-        button_bg = "#007bff"
-        button_hover_bg = "#0056b3"
-        text_color = "#000000"
-
-    st.markdown(
-        f"""
-        <style>
-        /* Card Styling */
-        .card {{
-            background-color: {card_background};
-            border-radius: 12px;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-            padding: 20px;
-            margin-bottom: 20px;
-            transition: background-color 0.3s ease, color 0.3s ease;
-        }}
-
-        /* AI Response Styling */
-        .ai-response {{
-            background-color: {ai_response_bg};
-            border-left: 6px solid {ai_response_border};
-            padding: 15px;
-            border-radius: 8px;
-            font-size: 16px;
-            line-height: 1.6;
-            color: {text_color};
-            transition: background-color 0.3s ease, color 0.3s ease;
-        }}
-
-        /* Blueprint Table Styling */
-        .blueprint-table {{
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 10px;
-            transition: background-color 0.3s ease, color 0.3s ease;
-        }}
-
-        .blueprint-table th, .blueprint-table td {{
-            border: 1px solid #ddd;
-            padding: 12px 15px;
-            text-align: left;
-            color: {text_color};
-            transition: background-color 0.3s ease, color 0.3s ease;
-        }}
-
-        .blueprint-table th {{
-            background-color: {table_header_bg};
-            color: #ffffff;
-            font-weight: 600;
-            transition: background-color 0.3s ease, color 0.3s ease;
-        }}
-
-        .blueprint-table tr:nth-child(even) {{
-            background-color: {table_row_even_bg};
-            transition: background-color 0.3s ease, color 0.3s ease;
-        }}
-
-        /* Button Styling */
-        .copy-button {{
-            background-color: {button_bg};
-            color: white;
-            border: none;
-            padding: 10px 16px;
-            text-align: center;
-            text-decoration: none;
-            display: inline-block;
-            font-size: 14px;
-            margin-top: 10px;
-            border-radius: 8px;
-            cursor: pointer;
-            transition: background-color 0.3s ease;
-        }}
-
-        .copy-button:hover {{
-            background-color: {button_hover_bg};
-        }}
-
-        /* Responsive Layout */
-        @media (max-width: 768px) {{
-            .card {{
-                padding: 15px;
-            }}
-
-            .copy-button {{
-                width: 100%;
-                padding: 12px 0;
-            }}
-        }}
-        </style>
-        """,
-        unsafe_allow_html=True
-    )
+# We will embed CSS within each components.html block to prevent conflicts.
 
 # ---------------------------------------------------
 # 4. Set Page Configuration
@@ -263,21 +154,7 @@ st.set_page_config(
 )
 
 # ---------------------------------------------------
-# 5. Retrieve the Current Theme and Inject CSS
-# ---------------------------------------------------
-def get_current_theme():
-    try:
-        current_theme = st.runtime.get_theme()
-        return current_theme.base  # 'dark' or 'light'
-    except AttributeError:
-        # Fallback for older Streamlit versions
-        return "light"
-
-theme_mode = get_current_theme()
-inject_css(theme_mode)
-
-# ---------------------------------------------------
-# 6. Title and Instructions
+# 5. Title and Instructions
 # ---------------------------------------------------
 st.markdown("<h1 style='text-align: center;'>👩‍💻 Customer Service Assistant</h1>", unsafe_allow_html=True)
 
@@ -295,7 +172,7 @@ with st.expander("ℹ️ How to Use"):
     )
 
 # ---------------------------------------------------
-# 7. Layout with Two Columns: Input and Output
+# 6. Layout with Two Columns: Input and Output
 # ---------------------------------------------------
 input_col, output_col = st.columns([1, 2])
 
@@ -327,19 +204,89 @@ with output_col:
         # 8. Display AI Response
         # ---------------------------------------------------
         if response:
-            st.markdown("### 📄 Generated Response")
+            # Define unique IDs for response
             response_div_id = "aiResponse"
-            st.markdown(
-                f"""<div class="ai-response" id="{response_div_id}">
+
+            # Embed the response and copy button within a components.html block
+            response_html = f"""
+            <style>
+            /* Card Styling */
+            .card {{
+                background-color: {"#2c2f33" if get_current_theme() == "dark" else "#ffffff"};
+                border-radius: 12px;
+                box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+                padding: 20px;
+                margin-bottom: 20px;
+            }}
+
+            /* AI Response Styling */
+            .ai-response {{
+                background-color: {"#23272a" if get_current_theme() == "dark" else "#f0f0f0"};
+                border-left: 6px solid {"#7289da" if get_current_theme() == "dark" else "#007bff"};
+                padding: 15px;
+                border-radius: 8px;
+                font-size: 16px;
+                line-height: 1.6;
+                color: {"#ffffff" if get_current_theme() == "dark" else "#000000"};
+            }}
+
+            /* Button Styling */
+            .copy-button {{
+                background-color: {"#7289da" if get_current_theme() == "dark" else "#007bff"};
+                color: white;
+                border: none;
+                padding: 10px 16px;
+                text-align: center;
+                text-decoration: none;
+                display: inline-block;
+                font-size: 14px;
+                margin-top: 10px;
+                border-radius: 8px;
+                cursor: pointer;
+                transition: background-color 0.3s ease;
+            }}
+
+            .copy-button:hover {{
+                background-color: {"#99aab5" if get_current_theme() == "dark" else "#0056b3"};
+            }}
+            </style>
+
+            <div class="card">
+                <div class="ai-response" id="{response_div_id}">
                     {response}
-                </div>""",
-                unsafe_allow_html=True
-            )
-            # Embed JavaScript copy button for AI Response
-            copy_response_button = f"""
-            <button class="copy-button" onclick="copyToClipboard('{response_div_id}')">📋 Copy Response</button>
+                </div>
+                <button class="copy-button" onclick="copyToClipboard('{response_div_id}')">📋 Copy Response</button>
+            </div>
+
+            <script>
+            function copyToClipboard(elementId) {{
+                var element = document.getElementById(elementId);
+                if (element) {{
+                    // Create a temporary textarea to hold the text
+                    var textarea = document.createElement("textarea");
+                    textarea.value = element.innerText;
+                    document.body.appendChild(textarea);
+                    textarea.select();
+                    try {{
+                        var successful = document.execCommand('copy');
+                        if (successful) {{
+                            alert('Copied to clipboard!');
+                        }} else {{
+                            alert('Failed to copy text.');
+                        }}
+                    }} catch (err) {{
+                        alert('Browser does not support copying.');
+                    }}
+                    document.body.removeChild(textarea);
+                }} else {{
+                    alert('Element not found!');
+                }}
+            }}
+            </script>
             """
-            components.html(copy_response_button)
+
+            # Render the response HTML
+            components.html(response_html, height=300)
 
         # ---------------------------------------------------
         # 9. Display Blueprint
@@ -347,54 +294,108 @@ with output_col:
         if blueprint:
             blueprint_df = parse_markdown_table(blueprint)
             if blueprint_df is not None:
-                st.markdown("### 📋 Interaction Blueprint")
+                # Define unique IDs for blueprint
                 blueprint_div_id = "blueprint"
-                st.markdown(
-                    f"""<div class="card" id="{blueprint_div_id}">
-                        {blueprint_df.to_html(index=False)}
-                    </div>""",
-                    unsafe_allow_html=True
-                )
-                # Embed JavaScript copy button for Blueprint
-                copy_blueprint_button = f"""
-                <button class="copy-button" onclick="copyToClipboard('{blueprint_div_id}')">📋 Copy Blueprint</button>
+
+                # Convert DataFrame to HTML table
+                blueprint_table_html = blueprint_df.to_html(index=False)
+
+                # Embed the blueprint and copy button within a components.html block
+                blueprint_html = f"""
+                <style>
+                /* Card Styling */
+                .card {{
+                    background-color: {"#2c2f33" if get_current_theme() == "dark" else "#ffffff"};
+                    border-radius: 12px;
+                    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+                    padding: 20px;
+                    margin-bottom: 20px;
+                }}
+
+                /* Blueprint Table Styling */
+                .blueprint-table {{
+                    width: 100%;
+                    border-collapse: collapse;
+                    margin-top: 10px;
+                }}
+
+                .blueprint-table th, .blueprint-table td {{
+                    border: 1px solid #ddd;
+                    padding: 12px 15px;
+                    text-align: left;
+                    color: {"#ffffff" if get_current_theme() == "dark" else "#000000"};
+                }}
+
+                .blueprint-table th {{
+                    background-color: {"#7289da" if get_current_theme() == "dark" else "#007bff"};
+                    color: #ffffff;
+                    font-weight: 600;
+                }}
+
+                .blueprint-table tr:nth-child(even) {{
+                    background-color: {"#23272a" if get_current_theme() == "dark" else "#f8f9fa"};
+                }}
+
+                /* Button Styling */
+                .copy-button {{
+                    background-color: {"#7289da" if get_current_theme() == "dark" else "#007bff"};
+                    color: white;
+                    border: none;
+                    padding: 10px 16px;
+                    text-align: center;
+                    text-decoration: none;
+                    display: inline-block;
+                    font-size: 14px;
+                    margin-top: 10px;
+                    border-radius: 8px;
+                    cursor: pointer;
+                    transition: background-color 0.3s ease;
+                }}
+
+                .copy-button:hover {{
+                    background-color: {"#99aab5" if get_current_theme() == "dark" else "#0056b3"};
+                }}
+                </style>
+
+                <div class="card">
+                    <div class="blueprint-table" id="{blueprint_div_id}">
+                        {blueprint_table_html}
+                    </div>
+                    <button class="copy-button" onclick="copyToClipboard('{blueprint_div_id}')">📋 Copy Blueprint</button>
+                </div>
+
+                <script>
+                function copyToClipboard(elementId) {{
+                    var element = document.getElementById(elementId);
+                    if (element) {{
+                        // Create a temporary textarea to hold the text
+                        var textarea = document.createElement("textarea");
+                        textarea.value = element.innerText;
+                        document.body.appendChild(textarea);
+                        textarea.select();
+                        try {{
+                            var successful = document.execCommand('copy');
+                            if (successful) {{
+                                alert('Copied to clipboard!');
+                            }} else {{
+                                alert('Failed to copy text.');
+                            }}
+                        }} catch (err) {{
+                            alert('Browser does not support copying.');
+                        }}
+                        document.body.removeChild(textarea);
+                    }} else {{
+                        alert('Element not found!');
+                    }}
+                }}
+                </script>
                 """
-                components.html(copy_blueprint_button)
+
+                # Render the blueprint HTML
+                components.html(blueprint_html, height=400)
             else:
                 st.warning("Could not parse the blueprint table. Please ensure the AI provides a valid markdown table.")
                 st.text(blueprint)
-
-    # ---------------------------------------------------
-    # 10. Inject JavaScript for Copy Functionality
-    # ---------------------------------------------------
-    copy_js = """
-    <script>
-    function copyToClipboard(elementId) {
-        var element = document.getElementById(elementId);
-        if (element) {
-            // Create a temporary textarea to hold the text
-            var textarea = document.createElement("textarea");
-            textarea.value = element.innerText;
-            document.body.appendChild(textarea);
-            textarea.select();
-            try {
-                var successful = document.execCommand('copy');
-                if (successful) {
-                    alert('Copied to clipboard!');
-                } else {
-                    alert('Failed to copy text.');
-                }
-            } catch (err) {
-                alert('Browser does not support copying.');
-            }
-            document.body.removeChild(textarea);
-        } else {
-            alert('Element not found!');
-        }
-    }
-    </script>
-    """
-    st.markdown(copy_js, unsafe_allow_html=True)
 
 # ---------------------------------------------------
 # 11. Collapsible Privacy Statement
