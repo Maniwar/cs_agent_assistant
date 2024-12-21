@@ -1,4 +1,5 @@
 from openai import OpenAI
+import openai  # Import the openai module to access exception classes
 import streamlit as st
 import pandas as pd
 from io import StringIO
@@ -80,7 +81,25 @@ with output_col:
                             "The ultimate objective is to craft a response that leaves the customer feeling understood, valued, and satisfied. Remember, these responses are for a chat interaction, not an email, and will be used directly "
                             "in communication with the customer. Always respond concisely and without unnecessary explanations or greetings, keeping the focus on saving the agent's time. Be sure to provide step by step instructions to the customer where required."
                         )
-                    
+                    # Uncomment and adjust if "Create Keyphrase" is needed in the future
+                    # elif input_type == "Create Keyphrase":
+                    #     user_message = f"Generate keyphrases for the following subcategories: {input_text}"
+                    #     system_message = (
+                    #         "Your task is to generate keyphrases or short sentences that customers might use to discuss or inquire about the given subcategories."
+                    #         "These would be customer service complaints or NPS detractor type comments. "
+                    #         "Think of common phrases, questions, or statements related to each subcategory that customers could use in their interactions. "
+                    #         "These keyphrases will be used to enhance semantic sentence co-sign similarity functions for customer comments and transcripts. "
+                    #         "Ensure that the generated keyphrases are relevant, concise, and capture the essence of each subcategory."
+                    #         "\n\nThe following would be an example of the formatting:\n\n"
+                    #         "{\n"
+                    #         '    "Main category": {\n'
+                    #         '        "subcategory 1": ["Keyphrase 1", "Keyphrase 2", "Keyphrase 3"],\n'
+                    #         '        "subcategory 2": ["Keyphrase 1", "Keyphrase 2", "Keyphrase 3"],\n'
+                    #         '    }\n'
+                    #         "}\n\n"
+                    #         "Provide as many keyphrases as possible within your token limit. Format it as a dictionary. You must create as many as possible."
+                    #     )
+                
                     try:
                         response = client.chat.completions.create(
                             model="gpt4o-mini",
@@ -102,13 +121,13 @@ with output_col:
                         if ai_response.lower().startswith("response:"):
                             ai_response = ai_response[len("response:"):].strip()
                         return ai_response
-                    except OpenAI.InvalidRequestError as e:
+                    except openai.InvalidRequestError as e:
                         st.error(f"Invalid Request: {e}")
-                    except OpenAI.AuthenticationError as e:
+                    except openai.AuthenticationError as e:
                         st.error(f"Authentication Error: {e}")
-                    except OpenAI.APIConnectionError as e:
+                    except openai.APIConnectionError as e:
                         st.error(f"API Connection Error: {e}")
-                    except OpenAI.OpenAIError as e:
+                    except openai.OpenAIError as e:
                         st.error(f"An error occurred: {e}")
                     return None
                 
@@ -118,7 +137,10 @@ with output_col:
                         user_message = f"Based on the following customer message, provide a step-by-step interaction blueprint focusing on loyalty, ownership, and trust. Present it in a table format with columns: Step, Action, Example.\n\nCustomer Message: {input_text}"
                     elif input_type == "Brief Phrase":
                         user_message = f"Based on the following brief phrase, provide a step-by-step interaction blueprint focusing on loyalty, ownership, and trust. Present it in a table format with columns: Step, Action, Example.\n\nBrief Phrase: {input_text}"
-                    
+                    # elif input_type == "Create Keyphrase":
+                    #     user_message = f"Generate a blueprint based on the following keyphrase: {input_text}"
+                    #     # Define system_message if necessary
+                
                     system_message = (
                         "You are an expert in customer service interactions. Based on the provided input, create a detailed "
                         "blueprint that outlines a step-by-step strategy for handling the interaction. Focus on fostering loyalty, "
@@ -143,13 +165,13 @@ with output_col:
                         ).choices[0].message.content.strip()
                 
                         return blueprint_response
-                    except OpenAI.InvalidRequestError as e:
+                    except openai.InvalidRequestError as e:
                         st.error(f"Invalid Request: {e}")
-                    except OpenAI.AuthenticationError as e:
+                    except openai.AuthenticationError as e:
                         st.error(f"Authentication Error: {e}")
-                    except OpenAI.APIConnectionError as e:
+                    except openai.APIConnectionError as e:
                         st.error(f"API Connection Error: {e}")
-                    except OpenAI.OpenAIError as e:
+                    except openai.OpenAIError as e:
                         st.error(f"An error occurred: {e}")
                     return None
                 
@@ -188,12 +210,12 @@ with output_col:
                         )
                         # Copy Button for AI Response
                         st.markdown(
-                            """
+                            f"""
                             <div style="margin-top:10px;">
                                 <button onclick="copyToClipboard('aiResponse')" style="padding:5px 10px; background-color:#4CAF50; color:white; border:none; border-radius:4px; cursor:pointer;">
                                     📋 Copy Response
                                 </button>
-                                <textarea id="aiResponse" style="opacity:0; position:absolute; left:-9999px;">{}</textarea>
+                                <textarea id="aiResponse" style="opacity:0; position:absolute; left:-9999px;">{response}</textarea>
                             </div>
                             <script>
                             function copyToClipboard(elementId) {{
@@ -206,7 +228,8 @@ with output_col:
                                 alert("AI Response copied to clipboard!");
                             }}
                             </script>
-                            """.format(response)
+                            """,
+                            unsafe_allow_html=True
                         )
                 
                 # Display Blueprint
@@ -229,12 +252,12 @@ with output_col:
                 
                         # Copy Button for Blueprint
                         st.markdown(
-                            """
+                            f"""
                             <div style="margin-top:10px;">
                                 <button onclick="copyToClipboard('blueprintResponse')" style="padding:5px 10px; background-color:#4CAF50; color:white; border:none; border-radius:4px; cursor:pointer;">
                                     📋 Copy Blueprint
                                 </button>
-                                <textarea id="blueprintResponse" style="opacity:0; position:absolute; left:-9999px;">{}</textarea>
+                                <textarea id="blueprintResponse" style="opacity:0; position:absolute; left:-9999px;">{blueprint}</textarea>
                             </div>
                             <script>
                             function copyToClipboard(elementId) {{
@@ -247,9 +270,10 @@ with output_col:
                                 alert("Blueprint copied to clipboard!");
                             }}
                             </script>
-                            """.format(blueprint)
+                            """,
+                            unsafe_allow_html=True
                         )
-    
+
 # Collapsible Privacy Statement
 with st.expander('🔒 Data Privacy Statement', expanded=False):
     st.markdown(
