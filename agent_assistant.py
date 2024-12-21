@@ -1,14 +1,13 @@
 import streamlit as st
-from openai import OpenAI  # Ensure this import aligns with your OpenAI library version
+from openai import OpenAI
 import re
 
 # ---------------------------------------------------
 # 1. Initialize OpenAI Client
 # ---------------------------------------------------
-# Initialize the OpenAI client with the API key from Streamlit secrets
 client = OpenAI(
     api_key=st.secrets['OPENAI_API_KEY']
-)  # Ensure your OpenAI API key is correctly set in Streamlit secrets
+)
 
 # ---------------------------------------------------
 # 2. Define Helper Functions
@@ -47,9 +46,8 @@ def generate_response(input_type, input_text):
             st.error("Invalid input type selected.")
             return None
 
-        # Create the ChatCompletion
         response = client.chat.completions.create(
-            model="gpt-4o-mini",  # Ensure this is the correct model name
+            model="gpt-4o-mini",
             messages=[
                 {"role": "system", "content": system_message},
                 {"role": "user", "content": user_message},
@@ -64,7 +62,6 @@ def generate_response(input_type, input_text):
         )
 
         ai_response = response.choices[0].message.content.strip()
-        # Remove "Response: " prefix if present
         if ai_response.lower().startswith("response:"):
             ai_response = ai_response[len("response:"):].strip()
 
@@ -98,7 +95,7 @@ def generate_blueprint(input_type, input_text):
         )
 
         blueprint_response = client.chat.completions.create(
-            model="gpt-4o-mini",  # Ensure this is the correct model name
+            model="gpt-4o-mini",
             messages=[
                 {"role": "system", "content": system_message},
                 {"role": "user", "content": user_message}
@@ -122,7 +119,6 @@ def generate_blueprint(input_type, input_text):
 # 3. Define Function to Inject Theme-Aware CSS
 # ---------------------------------------------------
 def inject_css(theme):
-    # Define colors based on the theme
     if theme == "dark":
         card_background = "#2c2f33"
         ai_response_bg = "#23272a"
@@ -130,7 +126,6 @@ def inject_css(theme):
         table_row_even_bg = "#23272a"
         text_color = "#ffffff"
     else:
-        # Light theme colors
         card_background = "#ffffff"
         ai_response_bg = "#f0f0f0"
         table_header_bg = "#007bff"
@@ -140,7 +135,6 @@ def inject_css(theme):
     st.markdown(
         f"""
         <style>
-        /* General Card Styling */
         .card {{
             background-color: {card_background};
             border-radius: 12px;
@@ -151,7 +145,6 @@ def inject_css(theme):
             color: {text_color};
         }}
 
-        /* AI Response Styling */
         .ai-response {{
             background-color: {ai_response_bg};
             border-left: 6px solid {table_header_bg};
@@ -163,15 +156,14 @@ def inject_css(theme):
             transition: background-color 0.3s ease, color 0.3s ease;
         }}
 
-        /* Blueprint Table Styling */
-        table.blueprint-table {{
+        .blueprint-table {{
             width: 100%;
             border-collapse: collapse;
             margin-top: 10px;
             transition: background-color 0.3s ease, color 0.3s ease;
         }}
 
-        table.blueprint-table th, table.blueprint-table td {{
+        .blueprint-table th, .blueprint-table td {{
             border: 1px solid #ddd;
             padding: 12px 15px;
             text-align: left;
@@ -179,19 +171,18 @@ def inject_css(theme):
             transition: background-color 0.3s ease, color 0.3s ease;
         }}
 
-        table.blueprint-table th {{
+        .blueprint-table th {{
             background-color: {table_header_bg};
             color: #ffffff;
             font-weight: 600;
             transition: background-color 0.3s ease, color 0.3s ease;
         }}
 
-        table.blueprint-table tr:nth-child(even) {{
+        .blueprint-table tr:nth-child(even) {{
             background-color: {table_row_even_bg};
             transition: background-color 0.3s ease, color 0.3s ease;
         }}
 
-        /* Responsive Layout */
         @media (max-width: 768px) {{
             .card {{
                 padding: 15px;
@@ -217,9 +208,8 @@ st.set_page_config(
 def get_current_theme():
     try:
         current_theme = st.runtime.get_theme()
-        return current_theme.base  # 'dark' or 'light'
+        return current_theme.base
     except AttributeError:
-        # Fallback for older Streamlit versions
         return "light"
 
 theme_mode = get_current_theme()
@@ -238,7 +228,7 @@ with st.sidebar:
             1. **Input Type:** Choose between a full customer message or a brief phrase.
             2. **Enter Input:** Provide the customer's message or the brief phrase.
             3. **Generate:** Click the "Generate" button to receive a response and a tailored interaction blueprint.
-            4. **Copy:** Use the copy buttons in the code blocks to copy the generated content for your communications.
+            4. **Copy:** Click the copy icon next to each response to copy it to your clipboard.
             """
         )
     
@@ -254,8 +244,6 @@ with st.sidebar:
             **Data Retention:** We do not retain your data beyond the immediate scope of generating the AI response. Once the response is generated, any stored copies of your data are promptly deleted.
             
             **OpenAI Data Sharing:** By using this app, you agree to share your input data with OpenAI and acknowledge that OpenAI's terms and conditions apply to the processing and use of your data by OpenAI.
-            
-            If you have any concerns or questions about the data privacy practices of the App, please don't hesitate to contact us.
             """
         )
 
@@ -271,7 +259,6 @@ input_col, output_col = st.columns([1, 2])
 
 with input_col:
     st.header("📝 Input")
-    # Use Streamlit's form to handle input submission
     with st.form(key='input_form'):
         input_type = st.radio(
             "Choose the type of input",
@@ -285,7 +272,6 @@ with input_col:
         )
         submit_button = st.form_submit_button(label='Generate')
     
-    # Handle form submission
     if submit_button:
         if not input_text.strip():
             st.warning("Please enter some input to generate a response.")
@@ -294,21 +280,16 @@ with input_col:
                 response = generate_response(input_type, input_text)
                 blueprint = generate_blueprint(input_type, input_text) if response else None
 
-            # Store responses in session state to prevent resets
             st.session_state['response'] = response
             st.session_state['blueprint'] = blueprint
 
 with output_col:
-    # Retrieve responses from session state
     response = st.session_state.get('response', None)
     blueprint = st.session_state.get('blueprint', None)
     
-    # ---------------------------------------------------
-    # 9. Display AI Response
-    # ---------------------------------------------------
+    # Display AI Response
     if response:
         st.markdown("### 📄 Generated Response")
-        # Display the AI response within a styled card
         st.markdown(
             f"""<div class="card">
                     <div class="ai-response">
@@ -317,56 +298,58 @@ with output_col:
                 </div>""",
             unsafe_allow_html=True
         )
-        # Display the response in a markdown code block with native copy button
         st.markdown("**Copy the response below:**")
-        st.markdown(f"```text\n{response}\n```")
+        st.code(response, language=None)
 
-    # ---------------------------------------------------
-    # 10. Display Blueprint
-    # ---------------------------------------------------
+    # Display Blueprint
     if blueprint:
         st.markdown("### 📋 Interaction Blueprint")
-        # Display the blueprint within a styled card
-        st.markdown(
-            f"""<div class="card">
-                    <div class="ai-response">
-                        {blueprint}
-                    </div>
-                </div>""",
-            unsafe_allow_html=True
-        )
-        # Display the blueprint in a markdown code block with native copy button
-        st.markdown("**Copy the blueprint below:**")
-        st.markdown(f"```markdown\n{blueprint}\n```")
         
-        # ---------------------------------------------------
-        # 11. Extract and Display Customer-Facing Sentences
-        # ---------------------------------------------------
-        # Parse the blueprint table to extract the 'Example' column
+        # Full blueprint in expander
+        with st.expander("View Full Blueprint Table", expanded=False):
+            st.markdown(
+                f"""<div class="card">
+                        <div class="ai-response">
+                            {blueprint}
+                        </div>
+                    </div>""",
+                unsafe_allow_html=True
+            )
+            st.markdown("**Copy the full blueprint:**")
+            st.code(blueprint, language="markdown")
+        
+        # Parse and display individual examples
         table_match = re.findall(r'\|.*\|', blueprint)
-        if not table_match:
-            st.warning("Could not parse the blueprint table to extract customer-facing sentences.")
-        else:
-            # Find the header and determine the index of the 'Example' column
+        if table_match:
             headers = table_match[0].strip('|').split('|')
             headers = [header.strip().lower() for header in headers]
-            if 'example' not in headers:
-                st.warning("The blueprint table does not contain an 'Example' column.")
-            else:
+            
+            if 'step' in headers and 'example' in headers:
+                step_index = headers.index('step')
                 example_index = headers.index('example')
-                # Extract examples from each row
-                examples = []
+                
+                steps_and_examples = []
                 for row in table_match[2:]:  # Skip header and separator
                     cells = row.strip('|').split('|')
-                    if len(cells) > example_index:
+                    if len(cells) > max(step_index, example_index):
+                        step = cells[step_index].strip()
                         example = cells[example_index].strip()
-                        if example:
-                            examples.append(f"- {example}")
-                if examples:
-                    customer_sentences = "\n".join(examples)
-                    st.markdown("### 📝 Customer-Facing Sentences")
-                    st.markdown("**Copy the customer-facing sentences below:**")
-                    st.markdown(f"```text\n{customer_sentences}\n```")
+                        if step and example:
+                            steps_and_examples.append((step, example))
+                
+                if steps_and_examples:
+                    st.markdown("### 📝 Customer-Facing Responses")
+                    st.markdown("Click the copy button next to each response to copy it to your clipboard:")
+                    
+                    for i, (step, example) in enumerate(steps_and_examples, 1):
+                        col1, col2 = st.columns([3, 1])
+                        with col1:
+                            st.markdown(f"**Step {i}:** {example}")
+                        with col2:
+                            st.code(example, language=None)
                 else:
-                    st.warning("No customer-facing sentences found in the 'Example' column.")
-
+                    st.warning("No customer-facing sentences found in the blueprint.")
+            else:
+                st.warning("The blueprint table is missing required columns (Step and Example).")
+        else:
+            st.warning("Could not parse the blueprint table to extract customer-facing sentences.")
