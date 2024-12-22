@@ -44,7 +44,8 @@ and engaging. Do not assume details are lacking; your task is to elaborate on th
 
 The ultimate objective is to craft a response that leaves the customer feeling understood, valued, and satisfied. Remember, these responses 
 are for a chat interaction, not an email, and will be used directly in communication with the customer. Always respond concisely and without 
-unnecessary explanations or greetings, keeping the focus on saving the agent's time."""
+unnecessary explanations or greetings, keeping the focus on saving the agent's time. Be sure to provide step by step instructions to the 
+customer where required."""
 
         else:
             st.error("Invalid input type selected.")
@@ -165,6 +166,7 @@ def inject_css(theme):
             width: 100%;
             border-collapse: collapse;
             margin-top: 10px;
+            margin-bottom: 20px;
             transition: background-color 0.3s ease, color 0.3s ease;
         }}
 
@@ -307,6 +309,7 @@ with output_col:
         st.code(response, language=None)
 
     # Display Blueprint
+    # Display Blueprint
     if blueprint:
         st.markdown("### 📋 Interaction Blueprint")
         
@@ -364,5 +367,13 @@ with output_col:
                 
                 else:
                     st.error("Could not parse the blueprint table structure properly.")
+                    
+                # Display raw markdown for copying
+                st.markdown("**Raw Blueprint (for copying):**")
+                st.code(blueprint, language="markdown")
             else:
-                st.error("Invalid blueprint format received."
+                st.error("Invalid blueprint format received.")
+                
+# Display helpful message if no response or blueprint
+if not response and not blueprint:
+    st.info("Enter a message and click 'Generate' to get started!")
