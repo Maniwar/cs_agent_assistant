@@ -308,7 +308,7 @@ with output_col:
         st.markdown("**Copy the response below:**")
         st.code(response, language=None)
 
-    # Display Blueprint
+
     # Display Blueprint
     if blueprint:
         st.markdown("### 📋 Interaction Blueprint")
@@ -338,7 +338,12 @@ with output_col:
                         cells = [cell.strip() for cell in row.strip('|').split('|')]
                         html_table += '<tr>\n'
                         for cell in cells:
-                            html_table += f'<td>{cell}</td>\n'
+                            # Clean the cell content for display
+                            cleaned_cell = cell.strip()
+                            if (cleaned_cell.startswith('"') and cleaned_cell.endswith('"')) or \
+                               (cleaned_cell.startswith("'") and cleaned_cell.endswith("'")):
+                                cleaned_cell = cleaned_cell[1:-1]
+                            html_table += f'<td>{cleaned_cell}</td>\n'
                         html_table += '</tr>\n'
                     
                     html_table += '</table>'
@@ -361,7 +366,11 @@ with output_col:
                         for i, row in enumerate(table_rows[2:], 1):
                             cells = [cell.strip() for cell in row.strip('|').split('|')]
                             if len(cells) > example_index:
-                                example = cells[example_index]
+                                example = cells[example_index].strip()
+                                # Remove both single and double quotes if they wrap the entire string
+                                if (example.startswith('"') and example.endswith('"')) or \
+                                   (example.startswith("'") and example.endswith("'")):
+                                    example = example[1:-1]
                                 st.markdown(f"**Step {i}:**")
                                 st.code(example, language=None)
                 
