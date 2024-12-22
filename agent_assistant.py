@@ -331,50 +331,62 @@ with output_col:
         st.code(response, language=None)
 
     # Display Blueprint
-    if blueprint:
+ if blueprint:
         st.markdown("### 📋 Interaction Blueprint")
         
-        # Full blueprint in expander
-        with st.expander("View Full Blueprint Table", expanded=True):
-            st.markdown(
-                f"""<div class="card">
-                        <div class="ai-response">
-                            {blueprint}
-                        </div>
-                    </div>""",
-                unsafe_allow_html=True
-            )
-            st.markdown("**Copy the full blueprint:**")
-            st.code(blueprint, language="markdown")
-            
-            # Only try to parse the blueprint if it's a string
+        with st.expander("View Full Blueprint", expanded=True):
+            # Parse the blueprint table
             if isinstance(blueprint, str):
-                table_match = re.findall(r'\|.*\|', blueprint)
-                if table_match:
-                    headers = table_match[0].strip('|').split('|')
-                    headers = [header.strip().lower() for header in headers]
+                # Split the blueprint into lines and clean them
+                lines = [line.strip() for line in blueprint.split('\n') if line.strip()]
+                table_rows = [row for row in lines if row.startswith('|') and row.endswith('|')]
+                
+                if len(table_rows) >= 3:  # We need at least header, separator, and one data row
+                    # Extract headers
+                    headers = [h.strip() for h in table_rows[0].strip('|').split('|')]
                     
-                    if 'step' in headers and 'example' in headers:
-                        step_index = headers.index('step')
-                        example_index = headers.index('example')
+                    # Convert blueprint to HTML table with custom styling
+                    html_table = '<table class="blueprint-table">\n'
+                    
+                    # Add headers
+                    html_table += '<tr>\n'
+                    for header in headers:
+                        html_table += f'<th>{header}</th>\n'
+                    html_table += '</tr>\n'
+                    
+                    # Add data rows (skip header and separator)
+                    for row in table_rows[2:]:
+                        cells = [cell.strip() for cell in row.strip('|').split('|')]
+                        html_table += '<tr>\n'
+                        for cell in cells:
+                            html_table += f'<td>{cell}</td>\n'
+                        html_table += '</tr>\n'
+                    
+                    html_table += '</table>'
+                    
+                    # Display the formatted table
+                    st.markdown(
+                        f"""<div class="card">
+                                <div class="ai-response">
+                                    {html_table}
+                                </div>
+                            </div>""",
+                        unsafe_allow_html=True
+                    )
+                    
+                    # Extract and display customer-facing examples
+                    if 'example' in [h.lower() for h in headers]:
+                        example_index = [h.lower() for h in headers].index('example')
                         
-                        steps_and_examples = []
-                        for row in table_match[2:]:  # Skip header and separator
-                            cells = row.strip('|').split('|')
-                            if len(cells) > max(step_index, example_index):
-                                step = cells[step_index].strip()
-                                example = cells[example_index].strip()
-                                if step and example:
-                                    steps_and_examples.append((step, example))
-                        
-                        if steps_and_examples:
-                            st.markdown("### 📝 Customer-Facing Responses")
-                            for i, (step, example) in enumerate(steps_and_examples, 1):
+                        st.markdown("### 📝 Customer-Facing Examples")
+                        for i, row in enumerate(table_rows[2:], 1):
+                            cells = [cell.strip() for cell in row.strip('|').split('|')]
+                            if len(cells) > example_index:
+                                example = cells[example_index]
                                 st.markdown(f"**Step {i}:**")
                                 st.code(example, language=None)
-                        else:
-                            st.info("No customer-facing sentences found in the blueprint.")
-                    else:
-                        st.info("The blueprint table is missing required columns (Step and Example).")
+                
                 else:
-                    st.info("Could not parse the blueprint table to extract customer-facing sentences.")
+                    st.error("Could not parse the blueprint table structure properly.")
+            else:
+                st.error("Invalid blueprint format received.")
