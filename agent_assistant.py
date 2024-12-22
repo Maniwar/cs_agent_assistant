@@ -44,37 +44,12 @@ and engaging. Do not assume details are lacking; your task is to elaborate on th
 
 The ultimate objective is to craft a response that leaves the customer feeling understood, valued, and satisfied. Remember, these responses 
 are for a chat interaction, not an email, and will be used directly in communication with the customer. Always respond concisely and without 
-unnecessary explanations or greetings, keeping the focus on saving the agent's time. Be sure to provide step by step instructions to the 
-customer where required."""
+unnecessary explanations or greetings, keeping the focus on saving the agent's time."""
 
         else:
             st.error("Invalid input type selected.")
             return None
 
-        response = client.chat.completions.create(
-            model="gpt-4o-mini",
-            messages=[
-                {"role": "system", "content": system_message},
-                {"role": "user", "content": user_message},
-            ],
-            temperature=0.3,
-            max_tokens=16000,
-            n=1,
-            stop=None,
-            presence_penalty=0,
-            frequency_penalty=0,
-            user="user-identifier"
-        )
-
-        ai_response = response.choices[0].message.content.strip()
-        if ai_response.lower().startswith("response:"):
-            ai_response = ai_response[len("response:"):].strip()
-
-        return ai_response
-
-    except Exception as e:
-        st.error(f"An error occurred while generating the response: {e}")
-        return None
         response = client.chat.completions.create(
             model="gpt-4o-mini",
             messages=[
@@ -120,7 +95,8 @@ def generate_blueprint(input_type, input_text):
             "You are an expert in customer service interactions. Based on the provided input, create a detailed "
             "blueprint that outlines a step-by-step strategy for handling the interaction. Focus on fostering loyalty, "
             "ownership, and trust. Present the blueprint in a clear table format with three columns: Step, Action, Example. "
-            "Ensure each step is actionable and includes specific examples to guide the agent."
+            "Ensure each step is actionable and includes specific examples to guide the agent. Format the response as a "
+            "markdown table with | Step | Action | Example | headers."
         )
 
         blueprint_response = client.chat.completions.create(
@@ -331,7 +307,7 @@ with output_col:
         st.code(response, language=None)
 
     # Display Blueprint
- if blueprint:
+    if blueprint:
         st.markdown("### 📋 Interaction Blueprint")
         
         with st.expander("View Full Blueprint", expanded=True):
@@ -389,4 +365,4 @@ with output_col:
                 else:
                     st.error("Could not parse the blueprint table structure properly.")
             else:
-                st.error("Invalid blueprint format received.")
+                st.error("Invalid blueprint format received."
