@@ -223,10 +223,11 @@ theme_mode = get_current_theme()
 inject_css(theme_mode)
 
 # ---------------------------------------------------
-# 6. Sidebar: How to Use and Privacy Statement
+# 6. Sidebar Sections
 # ---------------------------------------------------
 with st.sidebar:
-    with st.sidebar.expander("ℹ️ How to Use"):
+    # How to Use
+    with st.expander("ℹ️ How to Use"):
         st.markdown(
             """
             This app generates professional and empathetic responses to customer inquiries.
@@ -239,7 +240,8 @@ with st.sidebar:
             """
         )
     
-    with st.sidebar.expander("🔒 Data Privacy Statement"):
+    # Privacy Statement
+    with st.expander("🔒 Data Privacy Statement"):
         st.markdown(
             """
             **Information Collection:** The App collects the customer inquiries and agent phrases you enter when using the App. These inputs are securely transmitted to OpenAI's GPT model to generate professional and empathetic responses.
@@ -253,18 +255,8 @@ with st.sidebar:
             **OpenAI Data Sharing:** By using this app, you agree to share your input data with OpenAI and acknowledge that OpenAI's terms and conditions apply to the processing and use of your data by OpenAI.
             """
         )
-
-# ---------------------------------------------------
-# 7. Title in the Main Area
-# ---------------------------------------------------
-st.markdown("<h1 style='text-align: center;'>👩‍💻 Customer Service Assistant</h1>", unsafe_allow_html=True)
-
-# ---------------------------------------------------
-# 8. Layout with Two Columns: Input and Output
-# ---------------------------------------------------
-input_col, output_col = st.columns([1, 2])
-
-with input_col:
+    
+    # Input Form in Sidebar
     st.header("📝 Input")
     with st.form(key='input_form'):
         input_type = st.radio(
@@ -279,6 +271,7 @@ with input_col:
         )
         submit_button = st.form_submit_button(label='Generate')
     
+    # Generate the response and blueprint if user clicked the button
     if submit_button:
         if not input_text.strip():
             st.warning("Please enter some input to generate a response.")
@@ -287,102 +280,104 @@ with input_col:
                 response = generate_response(input_type, input_text)
                 blueprint = generate_blueprint(input_type, input_text) if response else None
 
+            # Store results in session state for display in the main area
             st.session_state['response'] = response
             st.session_state['blueprint'] = blueprint
 
-with output_col:
-    response = st.session_state.get('response', None)
-    blueprint = st.session_state.get('blueprint', None)
-    
-    # Display AI Response
-    if response:
-        st.markdown("### 📄 Generated Response")
-        st.markdown(
-            f"""<div class="card">
-                    <div class="ai-response">
-                        {response}
-                    </div>
-                </div>""",
-            unsafe_allow_html=True
-        )
-        st.markdown("**Copy the response below:**")
-        st.code(response, language=None)
+# ---------------------------------------------------
+# 7. Title in the Main Area
+# ---------------------------------------------------
+st.markdown("<h1 style='text-align: center;'>👩‍💻 Customer Service Assistant</h1>", unsafe_allow_html=True)
 
+# ---------------------------------------------------
+# 8. Display the Output in the Main Area
+# ---------------------------------------------------
+response = st.session_state.get('response', None)
+blueprint = st.session_state.get('blueprint', None)
 
-    # Display Blueprint
-    if blueprint:
-        st.markdown("### 📋 Interaction Blueprint")
-        
-        with st.expander("View Full Blueprint", expanded=True):
-            # Parse the blueprint table
-            if isinstance(blueprint, str):
-                # Split the blueprint into lines and clean them
-                lines = [line.strip() for line in blueprint.split('\n') if line.strip()]
-                table_rows = [row for row in lines if row.startswith('|') and row.endswith('|')]
+if response:
+    st.markdown("### 📄 Generated Response")
+    st.markdown(
+        f"""<div class="card">
+                <div class="ai-response">
+                    {response}
+                </div>
+            </div>""",
+        unsafe_allow_html=True
+    )
+    st.markdown("**Copy the response below:**")
+    st.code(response, language=None)
+
+if blueprint:
+    st.markdown("### 📋 Interaction Blueprint")
+    with st.expander("View Full Blueprint", expanded=True):
+        # Parse the blueprint table
+        if isinstance(blueprint, str):
+            # Split the blueprint into lines and clean them
+            lines = [line.strip() for line in blueprint.split('\n') if line.strip()]
+            table_rows = [row for row in lines if row.startswith('|') and row.endswith('|')]
+            
+            if len(table_rows) >= 3:  # We need at least header, separator, and one data row
+                # Extract headers
+                headers = [h.strip() for h in table_rows[0].strip('|').split('|')]
                 
-                if len(table_rows) >= 3:  # We need at least header, separator, and one data row
-                    # Extract headers
-                    headers = [h.strip() for h in table_rows[0].strip('|').split('|')]
-                    
-                    # Convert blueprint to HTML table with custom styling
-                    html_table = '<table class="blueprint-table">\n'
-                    
-                    # Add headers
+                # Convert blueprint to HTML table with custom styling
+                html_table = '<table class="blueprint-table">\n'
+                
+                # Add headers
+                html_table += '<tr>\n'
+                for header in headers:
+                    html_table += f'<th>{header}</th>\n'
+                html_table += '</tr>\n'
+                
+                # Add data rows (skip header and separator)
+                for row in table_rows[2:]:
+                    cells = [cell.strip() for cell in row.strip('|').split('|')]
                     html_table += '<tr>\n'
-                    for header in headers:
-                        html_table += f'<th>{header}</th>\n'
+                    for cell in cells:
+                        cleaned_cell = cell.strip()
+                        if (cleaned_cell.startswith('"') and cleaned_cell.endswith('"')) or \
+                           (cleaned_cell.startswith("'") and cleaned_cell.endswith("'")):
+                            cleaned_cell = cleaned_cell[1:-1]
+                        html_table += f'<td>{cleaned_cell}</td>\n'
                     html_table += '</tr>\n'
+                
+                html_table += '</table>'
+                
+                # Display the formatted table
+                st.markdown(
+                    f"""<div class="card">
+                            <div class="ai-response">
+                                {html_table}
+                            </div>
+                        </div>""",
+                    unsafe_allow_html=True
+                )
+                
+                # Extract and display customer-facing examples
+                if 'example' in [h.lower() for h in headers]:
+                    example_index = [h.lower() for h in headers].index('example')
                     
-                    # Add data rows (skip header and separator)
-                    for row in table_rows[2:]:
+                    st.markdown("### 📝 Customer-Facing Examples")
+                    for i, row in enumerate(table_rows[2:], 1):
                         cells = [cell.strip() for cell in row.strip('|').split('|')]
-                        html_table += '<tr>\n'
-                        for cell in cells:
-                            # Clean the cell content for display
-                            cleaned_cell = cell.strip()
-                            if (cleaned_cell.startswith('"') and cleaned_cell.endswith('"')) or \
-                               (cleaned_cell.startswith("'") and cleaned_cell.endswith("'")):
-                                cleaned_cell = cleaned_cell[1:-1]
-                            html_table += f'<td>{cleaned_cell}</td>\n'
-                        html_table += '</tr>\n'
-                    
-                    html_table += '</table>'
-                    
-                    # Display the formatted table
-                    st.markdown(
-                        f"""<div class="card">
-                                <div class="ai-response">
-                                    {html_table}
-                                </div>
-                            </div>""",
-                        unsafe_allow_html=True
-                    )
-                    
-                    # Extract and display customer-facing examples
-                    if 'example' in [h.lower() for h in headers]:
-                        example_index = [h.lower() for h in headers].index('example')
-                        
-                        st.markdown("### 📝 Customer-Facing Examples")
-                        for i, row in enumerate(table_rows[2:], 1):
-                            cells = [cell.strip() for cell in row.strip('|').split('|')]
-                            if len(cells) > example_index:
-                                example = cells[example_index].strip()
-                                # Remove both single and double quotes if they wrap the entire string
-                                if (example.startswith('"') and example.endswith('"')) or \
-                                   (example.startswith("'") and example.endswith("'")):
-                                    example = example[1:-1]
-                                st.markdown(f"**Step {i}:**")
-                                st.code(example, language=None)
-                
-                else:
-                    st.error("Could not parse the blueprint table structure properly.")
-                    
-                # Display raw markdown for copying
-                st.markdown("**Raw Blueprint (for copying):**")
-                st.code(blueprint, language="markdown")
+                        if len(cells) > example_index:
+                            example = cells[example_index].strip()
+                            if (example.startswith('"') and example.endswith('"')) or \
+                               (example.startswith("'") and example.endswith("'")):
+                                example = example[1:-1]
+                            st.markdown(f"**Step {i}:**")
+                            st.code(example, language=None)
+            
             else:
-                st.error("Invalid blueprint format received.")
+                st.error("Could not parse the blueprint table structure properly.")
                 
+            # Display raw markdown for copying
+            st.markdown("**Raw Blueprint (for copying):**")
+            st.code(blueprint, language="markdown")
+        else:
+            st.error("Invalid blueprint format received.")
+
 # Display helpful message if no response or blueprint
 if not response and not blueprint:
-    st.info("Enter a message and click 'Generate' to get started!")
+    st.info("Enter a message in the sidebar and click 'Generate' to get started!")
